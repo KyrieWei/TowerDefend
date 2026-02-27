@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Generate Project Files",
+      "type": "shell",
+      "command": "/Users/kyriewei/Desktop/UnrealEngine/Engine/Build/BatchFiles/Mac/GenerateProjectFiles.sh",
+      "args": [
+        "-project=${workspaceFolder}/TowerDefend.uproject",
+        "-game",
+        "-engine"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Regenerate Unreal Engine project files for TowerDefend"
+    },
+    {
+      "label": "Build TowerDefend (DebugGame)",
+      "type": "shell",
+      "command": "/Users/kyriewei/Desktop/UnrealEngine/Engine/Build/BatchFiles/Mac/Build.sh",
+      "args": [
+        "TowerDefendEditor",
+        "Mac",
+        "DebugGame",
+        "-project=${workspaceFolder}/TowerDefend.uproject",
+        "-waitmutex"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$gcc",
+      "detail": "Build TowerDefend Editor target with DebugGame configuration"
+    },
+    {
+      "label": "Launch UnrealEditor (DebugGame)",
+      "type": "shell",
+      "command": "open",
+      "args": [
+        "/Users/kyriewei/Desktop/UnrealEngine/Engine/Binaries/Mac/UnrealEditor-Mac-DebugGame.app",
+        "--args",
+        "${workspaceFolder}/TowerDefend.uproject"
+      ],
+      "group": "none",
+      "problemMatcher": [],
+      "detail": "Launch Unreal Editor in DebugGame configuration with TowerDefend project"
+    }
+  ]
+}

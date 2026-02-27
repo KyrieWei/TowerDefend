@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{7494E984-324C-DF88-7F0C-6D9C75B99CAE}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "TowerDefend",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}

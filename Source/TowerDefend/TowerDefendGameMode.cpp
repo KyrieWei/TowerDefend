@@ -1,15 +1,11 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright TowerDefend. All Rights Reserved.
 
 #include "TowerDefendGameMode.h"
-#include "TowerDefendCharacter.h"
-#include "UObject/ConstructorHelpers.h"
+#include "Core/TDCameraPawn.h"
+#include "Core/TDPlayerController.h"
 
 ATowerDefendGameMode::ATowerDefendGameMode()
 {
-	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
-	if (PlayerPawnBPClass.Class != NULL)
-	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+    DefaultPawnClass = ATDCameraPawn::StaticClass();
+    PlayerControllerClass = ATDPlayerController::StaticClass();
 }

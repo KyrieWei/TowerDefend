@@ -24,7 +24,7 @@ class UTDTerrainGenerator;
  * 可在编辑器中拖入场景，通过 GenerateGrid 生成网格。
  */
 UCLASS()
-class ATDHexGridManager : public AActor
+class TOWERDEFEND_API ATDHexGridManager : public AActor
 {
     GENERATED_BODY()
 

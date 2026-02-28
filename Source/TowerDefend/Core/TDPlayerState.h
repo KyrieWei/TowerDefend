@@ -62,6 +62,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "TD|Economy")
     void AddResearchPoints(int32 Amount);
 
+    /**
+     * 消费科研点
+     * @return 是否扣除成功（余额不足时返回 false 且不扣除）
+     */
+    UFUNCTION(BlueprintCallable, Category = "TD|Economy")
+    bool SpendResearchPoints(int32 Amount);
+
     // ─── 血量操作接口（仅服务端调用） ─────────────────
 
     /** 扣除血量，到 0 时触发死亡 */

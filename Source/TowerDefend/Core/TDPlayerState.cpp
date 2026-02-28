@@ -102,6 +102,31 @@ void ATDPlayerState::AddResearchPoints(int32 Amount)
     ResearchPoints += Amount;
 }
 
+bool ATDPlayerState::SpendResearchPoints(int32 Amount)
+{
+    if (!HasAuthority())
+    {
+        return false;
+    }
+
+    if (Amount <= 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("ATDPlayerState::SpendResearchPoints - Invalid amount: %d"), Amount);
+        return false;
+    }
+
+    if (ResearchPoints < Amount)
+    {
+        UE_LOG(LogTemp, Verbose,
+            TEXT("ATDPlayerState::SpendResearchPoints - Cannot afford %d (have %d)"),
+            Amount, ResearchPoints);
+        return false;
+    }
+
+    ResearchPoints -= Amount;
+    return true;
+}
+
 // ─── 血量操作 ─────────────────────────────────────────
 
 void ATDPlayerState::ApplyDamage(int32 Damage)

@@ -20,7 +20,7 @@
  * 坐标由外部（TDHexGridManager）在创建时设置，不可运行时修改。
  */
 UCLASS()
-class ATDHexTile : public AActor
+class TOWERDEFEND_API ATDHexTile : public AActor
 {
     GENERATED_BODY()
 

@@ -51,3 +51,4 @@ Build/
 
 # Content Hot Reload
 Content/HotReload/
+Plugins/AgentIntegrationKit/Source/ThirdParty/Bun/Win64/bun.exe

@@ -2,7 +2,10 @@
 
 #include "Core/TDPlayerController.h"
 #include "Core/TDCameraPawn.h"
+#include "Core/TDTerrainEditorComponent.h"
+#include "Core/TDMapFileManager.h"
 #include "HexGrid/TDHexCoord.h"
+#include "HexGrid/TDHexGridManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -32,6 +35,10 @@ ATDPlayerController::ATDPlayerController()
     bShowMouseCursor = true;
     bEnableClickEvents = true;
     bEnableMouseOverEvents = true;
+
+    // 创建地形编辑器子组件
+    TerrainEditorComponent = CreateDefaultSubobject<UTDTerrainEditorComponent>(
+        TEXT("TerrainEditorComponent"));
 }
 
 // ===================================================================
@@ -132,6 +139,14 @@ void ATDPlayerController::SetupInputComponent()
         EnhancedInput->BindAction(
             IA_CameraFastMove, ETriggerEvent::Completed,
             this, &ATDPlayerController::HandleFastMoveCompleted);
+    }
+
+    // 左键点击 — 地形编辑器笔刷绘制
+    if (IA_LeftClick)
+    {
+        EnhancedInput->BindAction(
+            IA_LeftClick, ETriggerEvent::Started,
+            this, &ATDPlayerController::HandleLeftClick);
     }
 }
 
@@ -317,6 +332,14 @@ void ATDPlayerController::HandleFastMoveCompleted(const FInputActionValue& Value
     bIsFastMoving = false;
 }
 
+void ATDPlayerController::HandleLeftClick(const FInputActionValue& Value)
+{
+    if (TerrainEditorComponent && TerrainEditorComponent->IsInEditMode())
+    {
+        TerrainEditorComponent->PaintTileUnderCursor();
+    }
+}
+
 // ===================================================================
 // 内部方法
 // ===================================================================
@@ -404,4 +427,178 @@ ATDCameraPawn* ATDPlayerController::GetCameraPawn() const
                  "Possessed Pawn is not ATDCameraPawn."));
     }
     return CameraPawn;
+}
+
+// ===================================================================
+// 控制台命令 (Exec)
+// ===================================================================
+
+void ATDPlayerController::TerrainEditMode()
+{
+    if (!TerrainEditorComponent)
+    {
+        UE_LOG(LogTDCamera, Error,
+            TEXT("TerrainEditMode: TerrainEditorComponent is null."));
+        return;
+    }
+
+    TerrainEditorComponent->ToggleEditMode();
+
+    if (GEngine)
+    {
+        const FString StateStr = TerrainEditorComponent->IsInEditMode()
+            ? TEXT("ON") : TEXT("OFF");
+        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow,
+            FString::Printf(TEXT("Terrain Edit Mode: %s"), *StateStr));
+    }
+}
+
+void ATDPlayerController::TerrainBrush(const FString& TypeName)
+{
+    if (!TerrainEditorComponent)
+    {
+        UE_LOG(LogTDCamera, Error,
+            TEXT("TerrainBrush: TerrainEditorComponent is null."));
+        return;
+    }
+
+    // 字符串 → 枚举解析
+    ETDTerrainType NewType = ETDTerrainType::Plain;
+
+    if (TypeName.Equals(TEXT("Plain"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Plain;
+    }
+    else if (TypeName.Equals(TEXT("Hill"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Hill;
+    }
+    else if (TypeName.Equals(TEXT("Mountain"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Mountain;
+    }
+    else if (TypeName.Equals(TEXT("Forest"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Forest;
+    }
+    else if (TypeName.Equals(TEXT("River"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::River;
+    }
+    else if (TypeName.Equals(TEXT("Swamp"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Swamp;
+    }
+    else if (TypeName.Equals(TEXT("DeepWater"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::DeepWater;
+    }
+    else
+    {
+        UE_LOG(LogTDCamera, Warning,
+            TEXT("TerrainBrush: Unknown type '%s'. "
+                 "Valid: Plain, Hill, Mountain, Forest, River, Swamp, DeepWater"),
+            *TypeName);
+
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                FString::Printf(TEXT("Unknown terrain type: %s"), *TypeName));
+        }
+        return;
+    }
+
+    TerrainEditorComponent->SetBrushTerrainType(NewType);
+
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan,
+            FString::Printf(TEXT("Terrain Brush: %s"), *TypeName));
+    }
+}
+
+void ATDPlayerController::SaveMap(const FString& MapName)
+{
+    if (MapName.IsEmpty())
+    {
+        UE_LOG(LogTDCamera, Warning, TEXT("SaveMap: MapName is empty. Usage: SaveMap <MapName>"));
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("SaveMap: Please provide a map name."));
+        }
+        return;
+    }
+
+    if (!TerrainEditorComponent || !TerrainEditorComponent->GetGridManager())
+    {
+        UE_LOG(LogTDCamera, Error,
+            TEXT("SaveMap: No GridManager available."));
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("SaveMap: No GridManager found."));
+        }
+        return;
+    }
+
+    const bool bSuccess = UTDMapFileManager::SaveMapToFile(
+        TerrainEditorComponent->GetGridManager(), MapName);
+
+    if (GEngine)
+    {
+        if (bSuccess)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
+                FString::Printf(TEXT("Map saved: %s"), *MapName));
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                FString::Printf(TEXT("Failed to save map: %s"), *MapName));
+        }
+    }
+}
+
+void ATDPlayerController::LoadMap(const FString& MapName)
+{
+    if (MapName.IsEmpty())
+    {
+        UE_LOG(LogTDCamera, Warning, TEXT("LoadMap: MapName is empty. Usage: LoadMap <MapName>"));
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("LoadMap: Please provide a map name."));
+        }
+        return;
+    }
+
+    if (!TerrainEditorComponent || !TerrainEditorComponent->GetGridManager())
+    {
+        UE_LOG(LogTDCamera, Error,
+            TEXT("LoadMap: No GridManager available."));
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("LoadMap: No GridManager found."));
+        }
+        return;
+    }
+
+    const bool bSuccess = UTDMapFileManager::LoadMapFromFile(
+        TerrainEditorComponent->GetGridManager(), MapName);
+
+    if (GEngine)
+    {
+        if (bSuccess)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
+                FString::Printf(TEXT("Map loaded: %s"), *MapName));
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                FString::Printf(TEXT("Failed to load map: %s"), *MapName));
+        }
+    }
 }

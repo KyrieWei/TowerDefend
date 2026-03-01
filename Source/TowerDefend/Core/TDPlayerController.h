@@ -11,6 +11,7 @@ class UInputAction;
 struct FInputActionValue;
 struct FTDHexCoord;
 class ATDCameraPawn;
+class UTDTerrainEditorComponent;
 
 /**
  * ATDPlayerController - 策略视角相机控制器。
@@ -183,6 +184,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
     TObjectPtr<UInputAction> IA_CameraFastMove;
 
+    /** 左键点击输入动作 (Bool)。用于地形编辑器笔刷绘制。 */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
+    TObjectPtr<UInputAction> IA_LeftClick;
+
+    // ---------------------------------------------------------------
+    // 地形编辑器
+    // ---------------------------------------------------------------
+
+    /** 地形编辑器组件。 */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TerrainEditor",
+        meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UTDTerrainEditorComponent> TerrainEditorComponent;
+
 private:
 
     // ---------------------------------------------------------------
@@ -203,6 +217,29 @@ private:
 
     /** Shift 加速结束回调。 */
     void HandleFastMoveCompleted(const FInputActionValue& Value);
+
+    /** 左键点击回调，编辑模式下执行笔刷绘制。 */
+    void HandleLeftClick(const FInputActionValue& Value);
+
+    // ---------------------------------------------------------------
+    // 控制台命令 (Exec)
+    // ---------------------------------------------------------------
+
+    /** 切换地形编辑模式。 */
+    UFUNCTION(Exec)
+    void TerrainEditMode();
+
+    /** 设置地形笔刷类型。用法: TerrainBrush <TypeName> */
+    UFUNCTION(Exec)
+    void TerrainBrush(const FString& TypeName);
+
+    /** 保存当前地图到文件。用法: SaveMap <MapName> */
+    UFUNCTION(Exec)
+    void SaveMap(const FString& MapName);
+
+    /** 从文件加载地图。用法: LoadMap <MapName> */
+    UFUNCTION(Exec)
+    void LoadMap(const FString& MapName);
 
     // ---------------------------------------------------------------
     // 内部方法

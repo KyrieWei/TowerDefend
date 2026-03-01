@@ -351,3 +351,14 @@ bool ATDGameMode::ShouldEndMatch() const
 
     return false;
 }
+
+// ─── 作弊接口 ─────────────────────────────────────────
+
+#if !UE_BUILD_SHIPPING
+void ATDGameMode::CheatSetPhase(ETDGamePhase NewPhase)
+{
+    UE_LOG(LogTemp, Log, TEXT("ATDGameMode::CheatSetPhase - Forcing phase to %d"), static_cast<uint8>(NewPhase));
+    StopPhaseTimer();
+    SetPhase(NewPhase);
+}
+#endif

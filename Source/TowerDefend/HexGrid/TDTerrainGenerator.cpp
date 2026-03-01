@@ -18,15 +18,24 @@ FTDHexGridSaveData UTDTerrainGenerator::GenerateMap()
     // 使用 TMap 便于按坐标随机访问（对称化、平滑等需要）
     TMap<FTDHexCoord, FTDHexTileSaveData> TileDataMap;
 
-    // 预估格子总数: 3*R^2 + 3*R + 1
-    const int32 EstimatedCount = 3 * MapRadius * MapRadius + 3 * MapRadius + 1;
-    TileDataMap.Reserve(EstimatedCount);
-
     // ---------------------------------------------------------------
     // Step 1: Noise 生成高度场和湿度场
     // ---------------------------------------------------------------
-    const FTDHexCoord Origin(0, 0);
-    TArray<FTDHexCoord> AllCoords = Origin.GetCoordsInRange(MapRadius);
+    TArray<FTDHexCoord> AllCoords;
+    if (bRectangularLayout)
+    {
+        AllCoords = GenerateRectCoords(MapColumns, MapRows);
+        const int32 EstimatedCount = MapColumns * MapRows;
+        TileDataMap.Reserve(EstimatedCount);
+    }
+    else
+    {
+        const FTDHexCoord Origin(0, 0);
+        AllCoords = Origin.GetCoordsInRange(MapRadius);
+        // 预估格子总数: 3*R^2 + 3*R + 1
+        const int32 EstimatedCount = 3 * MapRadius * MapRadius + 3 * MapRadius + 1;
+        TileDataMap.Reserve(EstimatedCount);
+    }
 
     for (const FTDHexCoord& Coord : AllCoords)
     {
@@ -54,7 +63,15 @@ FTDHexGridSaveData UTDTerrainGenerator::GenerateMap()
     // ---------------------------------------------------------------
     // Step 3: 计算基地位置并平坦化周围区域
     // ---------------------------------------------------------------
-    TArray<FTDHexCoord> BasePositions = CalculateBasePositions(PlayerCount, MapRadius);
+    TArray<FTDHexCoord> BasePositions;
+    if (bRectangularLayout)
+    {
+        BasePositions = CalculateBasePositionsRect(PlayerCount, MapColumns, MapRows);
+    }
+    else
+    {
+        BasePositions = CalculateBasePositions(PlayerCount, MapRadius);
+    }
     FlattenAroundBases(TileDataMap, BasePositions, BaseFlattenRadius);
 
     // 标记基地归属
@@ -79,6 +96,11 @@ FTDHexGridSaveData UTDTerrainGenerator::GenerateMap()
     Result.MapRadius = MapRadius;
     Result.Seed = ActualSeed;
     Result.Version = 1;
+    if (bRectangularLayout)
+    {
+        Result.MapColumns = MapColumns;
+        Result.MapRows = MapRows;
+    }
     Result.TileDataList.Reserve(TileDataMap.Num());
 
     for (auto& Pair : TileDataMap)
@@ -215,6 +237,66 @@ TArray<FTDHexCoord> UTDTerrainGenerator::CalculateBasePositions(int32 InPlayerCo
     }
 
     return Positions;
+}
+
+TArray<FTDHexCoord> UTDTerrainGenerator::CalculateBasePositionsRect(int32 InPlayerCount, int32 InColumns, int32 InRows)
+{
+    TArray<FTDHexCoord> Positions;
+    Positions.Reserve(InPlayerCount);
+
+    // 矩形布局：基地放在对角位置
+    // 左下角 offset (1, 1)，右上角 offset (Columns-2, Rows-2)
+    const int32 MarginCol = FMath::Min(1, InColumns - 1);
+    const int32 MarginRow = FMath::Min(1, InRows - 1);
+    const int32 MaxCol = FMath::Max(InColumns - 2, 0);
+    const int32 MaxRow = FMath::Max(InRows - 2, 0);
+
+    // 使用 even-q offset → cube 转换，与 GenerateRectCoords 保持一致
+    auto OffsetToCube = [](int32 Col, int32 Row) -> FTDHexCoord
+    {
+        const int32 Q = Col;
+        const int32 R = Row - Col / 2;
+        return FTDHexCoord(Q, R);
+    };
+
+    if (InPlayerCount == 2)
+    {
+        // 玩家1：左下角附近，玩家2：右上角附近
+        Positions.Add(OffsetToCube(MarginCol, MarginRow));
+        Positions.Add(OffsetToCube(MaxCol, MaxRow));
+    }
+    else
+    {
+        // 多位玩家：四角分布，最多 4 位
+        Positions.Add(OffsetToCube(MarginCol, MarginRow));       // 左下
+        Positions.Add(OffsetToCube(MaxCol, MaxRow));             // 右上
+        if (InPlayerCount >= 3)
+        {
+            Positions.Add(OffsetToCube(MaxCol, MarginRow));      // 右下
+        }
+        if (InPlayerCount >= 4)
+        {
+            Positions.Add(OffsetToCube(MarginCol, MaxRow));      // 左上
+        }
+    }
+
+    return Positions;
+}
+
+TArray<FTDHexCoord> UTDTerrainGenerator::GenerateRectCoords(int32 Columns, int32 Rows)
+{
+    TArray<FTDHexCoord> Coords;
+    Coords.Reserve(Columns * Rows);
+    for (int32 Col = 0; Col < Columns; ++Col)
+    {
+        for (int32 Row = 0; Row < Rows; ++Row)
+        {
+            const int32 Q = Col;
+            const int32 R = Row - Col / 2;  // even-q offset → cube
+            Coords.Add(FTDHexCoord(Q, R));
+        }
+    }
+    return Coords;
 }
 
 void UTDTerrainGenerator::ApplyPointSymmetry(TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap)

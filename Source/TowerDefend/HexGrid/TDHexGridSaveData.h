@@ -105,6 +105,14 @@ struct FTDHexGridSaveData
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
     int32 MapRadius = 0;
 
+    /** 矩形布局的列数（仅矩形布局有效，六边形布局为 0） */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
+    int32 MapColumns = 0;
+
+    /** 矩形布局的行数（仅矩形布局有效，六边形布局为 0） */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
+    int32 MapRows = 0;
+
     /** 生成此地图所用的随机种子。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
     int32 Seed = 0;

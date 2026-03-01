@@ -175,6 +175,15 @@ protected:
     UPROPERTY(Transient)
     UMaterialInstanceDynamic* TerrainMaterial = nullptr;
 
+    /**
+     * 地形类型 → 材质实例映射表。
+     * 在蓝图中配置，将每种地形类型关联到对应的 MaterialInstance 资产。
+     * 运行时根据地形类型从此表中查找材质并应用到 HexMeshComponent。
+     * 若某个地形类型未配置或对应资产为 nullptr，则回退到基础颜色方案。
+     */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexTile|Visual")
+    TMap<ETDTerrainType, TSoftObjectPtr<UMaterialInterface>> TerrainMaterials;
+
     // ---------------------------------------------------------------
     // 内部视觉更新
     // ---------------------------------------------------------------
@@ -182,12 +191,16 @@ protected:
     /** 根据当前 HeightLevel 更新 Actor 的 Z 轴位置。 */
     void UpdateVisualHeight();
 
-    /** 根据当前 TerrainType 更新动态材质参数。 */
+    /**
+     * 根据当前 TerrainType 更新材质外观。
+     * 优先从 TerrainMaterials 映射表加载对应的 MaterialInstance 并创建 MID；
+     * 若映射表中无对应条目，则回退到基础颜色方案（SetVectorParameterValue）。
+     */
     void UpdateVisualMaterial();
 
     /**
      * 获取地形类型对应的基础颜色。
-     * 用于在没有纹理资源时以纯色区分地形。
+     * 作为无材质实例配置时的回退方案，以纯色区分地形。
      */
     static FLinearColor GetTerrainBaseColor(ETDTerrainType Type);
 };

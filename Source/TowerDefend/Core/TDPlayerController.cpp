@@ -39,6 +39,8 @@ ATDPlayerController::ATDPlayerController()
     // 创建地形编辑器子组件
     TerrainEditorComponent = CreateDefaultSubobject<UTDTerrainEditorComponent>(
         TEXT("TerrainEditorComponent"));
+
+    CheatClass = UTDCheatManager::StaticClass();
 }
 
 // ===================================================================

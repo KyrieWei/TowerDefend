@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Core/TDCheatManager.h"
 #include "TDPlayerController.generated.h"
 
 class UInputMappingContext;

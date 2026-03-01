@@ -31,13 +31,6 @@ void ATDHexTile::InitFromSaveData(const FTDHexTileSaveData& InSaveData, float He
     // 不在此处设置位置 —— 位置由 GridManager::SpawnTilesFromData 在 Spawn 时决定。
     // 仅确保 Z 轴高度与内部数据一致。
     UpdateVisualHeight();
-
-    // 创建动态材质实例
-    if (HexMeshComponent && HexMeshComponent->GetMaterial(0))
-    {
-        TerrainMaterial = HexMeshComponent->CreateAndSetMaterialInstanceDynamic(0);
-    }
-
     UpdateVisualMaterial();
 }
 
@@ -183,13 +176,38 @@ void ATDHexTile::UpdateVisualHeight()
 
 void ATDHexTile::UpdateVisualMaterial()
 {
-    if (!TerrainMaterial)
+    if (!HexMeshComponent)
     {
         return;
     }
 
-    const FLinearColor BaseColor = GetTerrainBaseColor(TerrainType);
-    TerrainMaterial->SetVectorParameterValue(TEXT("BaseColor"), BaseColor);
+    // 尝试从 TerrainMaterials 映射表中加载对应地形的 MaterialInstance
+    if (const TSoftObjectPtr<UMaterialInterface>* Found = TerrainMaterials.Find(TerrainType))
+    {
+        UMaterialInterface* MaterialAsset = Found->LoadSynchronous();
+        if (MaterialAsset)
+        {
+            // 从地形专属 MaterialInstance 创建动态材质实例
+            TerrainMaterial = HexMeshComponent->CreateDynamicMaterialInstance(0, MaterialAsset);
+            return;
+        }
+    }
+
+    // 回退方案：使用 Mesh 上已有的基础材质创建 MID，通过 BaseColor 参数区分地形
+    if (!TerrainMaterial)
+    {
+        UMaterialInterface* BaseMaterial = HexMeshComponent->GetMaterial(0);
+        if (BaseMaterial)
+        {
+            TerrainMaterial = HexMeshComponent->CreateDynamicMaterialInstance(0, BaseMaterial);
+        }
+    }
+
+    if (TerrainMaterial)
+    {
+        const FLinearColor BaseColor = GetTerrainBaseColor(TerrainType);
+        TerrainMaterial->SetVectorParameterValue(TEXT("BaseColor"), BaseColor);
+    }
 }
 
 FLinearColor ATDHexTile::GetTerrainBaseColor(ETDTerrainType Type)

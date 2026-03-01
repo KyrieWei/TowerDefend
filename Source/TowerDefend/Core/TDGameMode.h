@@ -57,6 +57,11 @@ public:
     UFUNCTION(BlueprintCallable, Category = "TD|Phase")
     void StartNewRound();
 
+#if !UE_BUILD_SHIPPING
+    /** 作弊专用：直接跳转到指定阶段 */
+    void CheatSetPhase(ETDGamePhase NewPhase);
+#endif
+
     // ─── 查询接口 ─────────────────────────────────────
 
     /** 获取当前阶段 */

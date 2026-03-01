@@ -37,8 +37,22 @@ public:
 
     /** 地图半径（格子数），传入 GenerateGrid 时使用。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexGrid",
-        meta = (ClampMin = "1", ClampMax = "50"))
+        meta = (ClampMin = "1", ClampMax = "50", EditCondition = "!bRectangularLayout"))
     int32 MapRadius = 15;
+
+    /** 是否使用矩形布局 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexGrid")
+    bool bRectangularLayout = false;
+
+    /** 矩形布局的列数 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexGrid",
+        meta = (ClampMin = "1", ClampMax = "100", EditCondition = "bRectangularLayout"))
+    int32 MapColumns = 20;
+
+    /** 矩形布局的行数 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexGrid",
+        meta = (ClampMin = "1", ClampMax = "100", EditCondition = "bRectangularLayout"))
+    int32 MapRows = 20;
 
     /** 六边形外接圆半径（世界单位，厘米）。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HexGrid",

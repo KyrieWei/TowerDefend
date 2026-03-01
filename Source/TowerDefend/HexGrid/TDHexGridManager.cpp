@@ -22,6 +22,8 @@ void ATDHexGridManager::BeginPlay()
     Super::BeginPlay();
 
     EnsureTerrainGenerator();
+
+    GenerateGrid(0);
 }
 
 // ===================================================================
@@ -37,6 +39,9 @@ void ATDHexGridManager::GenerateGrid(int32 Radius)
     const int32 EffectiveRadius = (Radius > 0) ? Radius : MapRadius;
 
     TerrainGenerator->MapRadius = EffectiveRadius;
+    TerrainGenerator->bRectangularLayout = bRectangularLayout;
+    TerrainGenerator->MapColumns = MapColumns;
+    TerrainGenerator->MapRows = MapRows;
 
     FTDHexGridSaveData GeneratedData = TerrainGenerator->GenerateMap();
 
@@ -138,6 +143,14 @@ void ATDHexGridManager::ApplySaveData(const FTDHexGridSaveData& Data)
     CurrentMapRadius = Data.MapRadius;
     LastUsedSeed = Data.Seed;
 
+    // 恢复矩形布局配置
+    if (Data.MapColumns > 0 && Data.MapRows > 0)
+    {
+        bRectangularLayout = true;
+        MapColumns = Data.MapColumns;
+        MapRows = Data.MapRows;
+    }
+
     UE_LOG(LogTemp, Log,
         TEXT("ATDHexGridManager::ApplySaveData: Applied save data with radius %d, %d tiles."),
         CurrentMapRadius, TileMap.Num());
@@ -149,6 +162,11 @@ FTDHexGridSaveData ATDHexGridManager::ExportSaveData() const
     Result.MapRadius = CurrentMapRadius;
     Result.Seed = LastUsedSeed;
     Result.Version = 1;
+    if (bRectangularLayout)
+    {
+        Result.MapColumns = MapColumns;
+        Result.MapRows = MapRows;
+    }
     Result.TileDataList.Reserve(TileMap.Num());
 
     for (const auto& Pair : TileMap)

@@ -29,10 +29,24 @@ public:
     // 生成配置（UPROPERTY 可在编辑器 / 蓝图中配置）
     // ---------------------------------------------------------------
 
-    /** 地图半径（六边形格子数）。 */
+    /** 地图半径（六边形格子数），仅在非矩形布局时使用。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator",
-        meta = (ClampMin = "1", ClampMax = "50"))
+        meta = (ClampMin = "1", ClampMax = "50", EditCondition = "!bRectangularLayout"))
     int32 MapRadius = 15;
+
+    /** 是否使用矩形布局（否则为传统六边形布局） */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator")
+    bool bRectangularLayout = false;
+
+    /** 矩形布局的列数（每行格子数） */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator",
+        meta = (ClampMin = "1", ClampMax = "100", EditCondition = "bRectangularLayout"))
+    int32 MapColumns = 20;
+
+    /** 矩形布局的行数 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator",
+        meta = (ClampMin = "1", ClampMax = "100", EditCondition = "bRectangularLayout"))
+    int32 MapRows = 20;
 
     /** 随机种子。0 = 使用随机种子。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator")
@@ -121,6 +135,20 @@ private:
      * @return               基地坐标数组。
      */
     static TArray<FTDHexCoord> CalculateBasePositions(int32 InPlayerCount, int32 InMapRadius);
+
+    /**
+     * 计算矩形布局下的玩家基地坐标列表。
+     * 基地放在矩形对角位置。
+     *
+     * @param InPlayerCount  玩家数量。
+     * @param InColumns      矩形列数。
+     * @param InRows         矩形行数。
+     * @return               基地坐标数组。
+     */
+    static TArray<FTDHexCoord> CalculateBasePositionsRect(int32 InPlayerCount, int32 InColumns, int32 InRows);
+
+    /** 生成矩形区域内的所有坐标（even-q offset 布局） */
+    static TArray<FTDHexCoord> GenerateRectCoords(int32 Columns, int32 Rows);
 
     /**
      * 对称化处理：将坐标 (Q, R) 的数据镜像到 (-Q, -R)。

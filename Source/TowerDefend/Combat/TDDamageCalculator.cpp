@@ -5,11 +5,8 @@
 #include "HexGrid/TDHexTile.h"
 #include "HexGrid/TDHexCoord.h"
 
-// Unit/Building 模块并行开发中，使用前向声明的接口
-// 编译时需要完整类型定义，此处 include 占位
-// TODO: 当 Unit/Building 模块就绪后取消注释
-// #include "Unit/TDUnitBase.h"
-// #include "Building/TDBuildingBase.h"
+#include "Unit/TDUnitBase.h"
+#include "Building/TDBuildingBase.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTDDamage, Log, All);
 
@@ -30,7 +27,7 @@ int32 UTDDamageCalculator::CalculateUnitDamage(
     }
 
     // 基础伤害 = 攻击者的 CalculateDamageAgainst（含兵种克制）
-    const float BaseDamage = Attacker->CalculateDamageAgainst(Defender);
+    const float BaseDamage = Attacker->CalculateDamageAgainst(Defender, Grid);
 
     if (BaseDamage <= 0.0f)
     {

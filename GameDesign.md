@@ -594,3 +594,83 @@ PublicDependencyModuleNames.AddRange(new string[] {
 6. **实现地形修改** — `TDTerrainModifier`：运行时升高/降低格子并更新视觉
 7. **策略相机** — 有了地图和相机就能看到效果，快速迭代
 8. **建筑放置** — 在格子上放东西，验证整个交互链路
+
+---
+
+## 六、多 Agent 并行开发协作规范
+
+### 6.1 Worktree 分支结构
+
+项目使用 Git Worktree 实现多 Agent 并行开发，各 Agent 在独立分支上工作互不干扰：
+
+| Worktree 路径 | 分支 | 负责模块 |
+|---------------|------|---------|
+| `.claude/worktrees/terrain-system` | `feature/terrain-system` | TDHexTile, TDHexGridManager, TDTerrainGenerator, TDTerrainModifier, TDHexGridSaveData |
+| `.claude/worktrees/strategy-camera` | `feature/strategy-camera` | TDPlayerController, TDCameraPawn, Input Actions |
+| `.claude/worktrees/core-framework` | `feature/core-framework` | TDGameMode, TDGameState, TDPlayerState, TDGamePhaseTypes |
+
+### 6.2 任务文件约定
+
+每个 Worktree 根目录下有一个 `TASK.md` 文件，包含：
+- 任务目标与分支信息
+- 需要创建的文件清单及接口定义
+- 与其他模块的边界约定
+- 验证方式
+- **进度追踪记录**（见 6.3）
+
+Agent 启动后**必须先阅读** `TASK.md` 和项目根目录的 `DeveloperRules.md`。
+
+### 6.3 进度追踪规范
+
+每个 Agent **必须**在自己的 `TASK.md` 末尾维护一个 `## 进度记录` 章节，实时更新工作状态。
+
+**格式要求**：
+
+```markdown
+## 进度记录
+
+| 时间 | 文件 | 状态 | 备注 |
+|------|------|------|------|
+| 2026-02-28 10:00 | TDHexTile.h/cpp | 已完成 | 含 ETDTerrainType 枚举定义 |
+| 2026-02-28 10:30 | TDHexGridManager.h/cpp | 进行中 | GenerateGrid 已实现，ApplySaveData 待完成 |
+| 2026-02-28 11:00 | TDTerrainGenerator.h/cpp | 未开始 | - |
+```
+
+**状态值**：
+- `未开始` — 尚未动手
+- `进行中` — 正在编写
+- `已完成` — 代码完成且编译通过
+- `阻塞` — 因依赖或问题暂停（备注中说明原因）
+
+**更新时机**：
+- 每创建/完成一个文件时更新一次
+- 遇到阻塞问题时立即更新
+- 所有文件完成后更新最终状态
+
+### 6.4 查看全局进度
+
+在主仓库目录下执行以下命令可查看所有 Agent 进度：
+
+```bash
+# 查看所有 worktree 的进度记录
+for wt in .claude/worktrees/*/; do echo "=== $(basename $wt) ==="; grep -A 100 "## 进度记录" "$wt/TASK.md" 2>/dev/null || echo "(暂无进度)"; echo; done
+```
+
+### 6.5 合并流程
+
+所有 Agent 完成后，按以下顺序合并回 main：
+
+```bash
+# 1. 先合并无依赖的模块
+git merge feature/core-framework
+git merge feature/strategy-camera
+
+# 2. 再合并依赖最多的模块
+git merge feature/terrain-system
+
+# 3. 解决可能的冲突（主要在 Build.cs）后提交
+# 4. 清理 worktree
+git worktree remove .claude/worktrees/terrain-system
+git worktree remove .claude/worktrees/strategy-camera
+git worktree remove .claude/worktrees/core-framework
+```

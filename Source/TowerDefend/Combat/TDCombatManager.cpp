@@ -6,12 +6,9 @@
 #include "HexGrid/TDHexTile.h"
 #include "HexGrid/TDHexCoord.h"
 
-// Unit/Building 模块并行开发中，使用前向声明的接口
-// 编译时需要完整类型定义，此处 include 占位
-// TODO: 当 Unit/Building 模块就绪后取消注释
-// #include "Unit/TDUnitBase.h"
-// #include "Unit/TDUnitSquad.h"
-// #include "Unit/TDUnitAIController.h"
+#include "Unit/TDUnitBase.h"
+#include "Unit/TDUnitSquad.h"
+#include "Unit/TDUnitAIController.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTDCombat, Log, All);
 

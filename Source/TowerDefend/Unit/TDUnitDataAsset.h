@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Core/TDSharedTypes.h"
 #include "TDUnitDataAsset.generated.h"
 
 /**
@@ -20,22 +21,6 @@ enum class ETDUnitType : uint8
     Cavalry,    // 骑兵
     Siege,      // 攻城器械
     Special,    // 特殊单位
-};
-
-/**
- * ETDTechEra - 科技时代。
- *
- * 标识单位解锁所需的科技时代等级，数值与 TDPlayerState 的 CurrentTechEra 对应。
- */
-UENUM(BlueprintType)
-enum class ETDTechEra : uint8
-{
-    Ancient = 0,        // 远古
-    Classical = 1,      // 古典
-    Medieval = 2,       // 中世纪
-    Renaissance = 3,    // 文艺复兴
-    Industrial = 4,     // 工业
-    Modern = 5,         // 现代
 };
 
 /**

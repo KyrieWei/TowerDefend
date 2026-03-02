@@ -135,6 +135,37 @@ int32 UTDUnitSquad::GetUnitCountByOwner(int32 OwnerPlayerIndex) const
 // 批量操作
 // ===================================================================
 
+int32 UTDUnitSquad::GetTotalStrength() const
+{
+    int32 Total = 0;
+    for (const auto& Pair : UnitMap)
+    {
+        if (IsValid(Pair.Value) && !Pair.Value->IsDead())
+        {
+            Total += Pair.Value->GetCurrentHealth();
+        }
+    }
+    return Total;
+}
+
+int32 UTDUnitSquad::GetRemainingUnitCount(int32 OwnerPlayerIndex) const
+{
+    int32 Count = 0;
+    for (const auto& Pair : UnitMap)
+    {
+        if (IsValid(Pair.Value) && !Pair.Value->IsDead()
+            && Pair.Value->GetOwnerPlayerIndex() == OwnerPlayerIndex)
+        {
+            ++Count;
+        }
+    }
+    return Count;
+}
+
+// ===================================================================
+// 回合批量操作
+// ===================================================================
+
 void UTDUnitSquad::ResetAllMovePoints()
 {
     for (auto& Pair : UnitMap)

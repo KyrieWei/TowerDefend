@@ -118,6 +118,29 @@ public:
         const UTDHexPathfinding* Pathfinding
     ) const;
 
+    /**
+     * Enhanced AI decision considering terrain advantage, retreat, and siege priority.
+     * Priority order:
+     * 1. Low health -> retreat away from nearest enemy
+     * 2. Enemy in attack range -> attack nearest enemy
+     * 3. No attackable target -> move toward enemy, prefer high ground
+     * 4. Cannot move or attack -> idle
+     *
+     * @param Unit                 Unit to execute decision for.
+     * @param Grid                 Grid manager for terrain queries.
+     * @param Pathfinding          Pathfinding system. May be null (skips pathfinding).
+     * @param AllUnits             All units collection for friend/foe identification.
+     * @param RetreatHealthPercent Health percentage threshold to trigger retreat.
+     * @return                     The action result of this turn.
+     */
+    UFUNCTION(BlueprintCallable, Category = "TD|Unit|AI")
+    ETDAIActionResult ExecuteEnhancedTurn(
+        ATDUnitBase* Unit,
+        const ATDHexGridManager* Grid,
+        const UTDHexPathfinding* Pathfinding,
+        UTDUnitSquad* AllUnits,
+        float RetreatHealthPercent = 0.3f);
+
 private:
     /**
      * 执行攻击行为：对目标造成伤害。
@@ -142,4 +165,13 @@ private:
         const ATDHexGridManager* Grid,
         UTDUnitSquad* AllUnits
     );
+
+    /**
+     * Calculate a retreat target coordinate.
+     * Selects a passable neighbor tile farthest from the nearest enemy.
+     */
+    FTDHexCoord FindRetreatTarget(
+        const ATDUnitBase* Unit,
+        const ATDUnitBase* NearestEnemy,
+        const ATDHexGridManager* Grid) const;
 };

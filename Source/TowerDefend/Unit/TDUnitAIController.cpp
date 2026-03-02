@@ -245,3 +245,111 @@ void UTDUnitAIController::PerformMove(
     Unit->MoveTo(DestCoord, MoveCost);
     AllUnits->UpdateUnitPosition(Unit, OldCoord);
 }
+
+// ===================================================================
+// Enhanced AI
+// ===================================================================
+
+ETDAIActionResult UTDUnitAIController::ExecuteEnhancedTurn(
+    ATDUnitBase* Unit,
+    const ATDHexGridManager* Grid,
+    const UTDHexPathfinding* Pathfinding,
+    UTDUnitSquad* AllUnits,
+    float RetreatHealthPercent)
+{
+    if (!Unit || Unit->IsDead() || !Grid || !AllUnits)
+    {
+        return ETDAIActionResult::None;
+    }
+
+    ATDUnitBase* NearestEnemy = FindNearestEnemy(Unit, AllUnits);
+
+    // Priority 1: Low health -> retreat
+    if (NearestEnemy && Unit->GetMaxHealth() > 0)
+    {
+        const float HealthPercent = static_cast<float>(Unit->GetCurrentHealth())
+            / static_cast<float>(Unit->GetMaxHealth());
+
+        if (HealthPercent <= RetreatHealthPercent)
+        {
+            FTDHexCoord RetreatCoord = FindRetreatTarget(
+                Unit, NearestEnemy, Grid);
+
+            if (RetreatCoord.IsValid())
+            {
+                PerformMove(Unit, RetreatCoord, Grid, AllUnits);
+                return ETDAIActionResult::Moved;
+            }
+        }
+    }
+
+    // Priority 2: Enemy in attack range -> attack
+    ATDUnitBase* Target = FindEnemyInRange(Unit, AllUnits);
+    if (Target)
+    {
+        PerformAttack(Unit, Target, Grid);
+        return ETDAIActionResult::Attacked;
+    }
+
+    // Priority 3: Move toward nearest enemy
+    if (NearestEnemy && Unit->GetRemainingMovePoints() > 0.0f)
+    {
+        FTDHexCoord MoveTarget = FindMoveTarget(
+            Unit, NearestEnemy, Grid, Pathfinding);
+
+        if (MoveTarget.IsValid())
+        {
+            PerformMove(Unit, MoveTarget, Grid, AllUnits);
+
+            // Try to attack after moving
+            ATDUnitBase* NewTarget = FindEnemyInRange(Unit, AllUnits);
+            if (NewTarget)
+            {
+                PerformAttack(Unit, NewTarget, Grid);
+                return ETDAIActionResult::Attacked;
+            }
+
+            return ETDAIActionResult::Moved;
+        }
+    }
+
+    // Priority 4: Idle
+    return ETDAIActionResult::Idle;
+}
+
+FTDHexCoord UTDUnitAIController::FindRetreatTarget(
+    const ATDUnitBase* Unit,
+    const ATDUnitBase* NearestEnemy,
+    const ATDHexGridManager* Grid) const
+{
+    if (!Unit || !NearestEnemy || !Grid)
+    {
+        return FTDHexCoord::Invalid();
+    }
+
+    const FTDHexCoord UnitCoord = Unit->GetCurrentCoord();
+    const FTDHexCoord EnemyCoord = NearestEnemy->GetCurrentCoord();
+
+    FTDHexCoord BestCoord = FTDHexCoord::Invalid();
+    int32 BestDistance = -1;
+
+    for (int32 Dir = 0; Dir < 6; ++Dir)
+    {
+        FTDHexCoord Neighbor = UnitCoord.GetNeighbor(Dir);
+        ATDHexTile* Tile = Grid->GetTileAt(Neighbor);
+
+        if (!Tile || !Tile->IsPassable())
+        {
+            continue;
+        }
+
+        int32 DistToEnemy = Neighbor.DistanceTo(EnemyCoord);
+        if (DistToEnemy > BestDistance)
+        {
+            BestDistance = DistToEnemy;
+            BestCoord = Neighbor;
+        }
+    }
+
+    return BestCoord;
+}

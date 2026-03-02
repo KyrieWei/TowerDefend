@@ -102,6 +102,22 @@ public:
     UFUNCTION(BlueprintPure, Category = "TD|Unit|Squad")
     int32 GetUnitCountByOwner(int32 OwnerPlayerIndex) const;
 
+    /**
+     * Get the total combat strength of all alive units.
+     * Strength = sum of current health of all alive units.
+     */
+    UFUNCTION(BlueprintPure, Category = "TD|Unit|Squad")
+    int32 GetTotalStrength() const;
+
+    /**
+     * Get the number of alive units for a given player.
+     *
+     * @param OwnerPlayerIndex Player index.
+     * @return Number of alive units.
+     */
+    UFUNCTION(BlueprintPure, Category = "TD|Unit|Squad")
+    int32 GetRemainingUnitCount(int32 OwnerPlayerIndex) const;
+
     // ---------------------------------------------------------------
     // 批量操作
     // ---------------------------------------------------------------

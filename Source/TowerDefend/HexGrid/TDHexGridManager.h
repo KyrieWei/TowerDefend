@@ -119,6 +119,14 @@ public:
     TArray<ATDHexTile*> GetTilesInRange(const FTDHexCoord& Center, int32 Range) const;
 
     /**
+     * Get all tile actors in the current grid.
+     *
+     * @return  Array of all tile actors.
+     */
+    UFUNCTION(BlueprintPure, Category = "HexGrid")
+    TArray<ATDHexTile*> GetAllTiles() const;
+
+    /**
      * 获取当前地图中所有格子的数量。
      */
     UFUNCTION(BlueprintPure, Category = "HexGrid")

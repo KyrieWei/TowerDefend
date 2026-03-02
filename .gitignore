@@ -62,4 +62,5 @@ __pycache__/
 *.log
 
 # Claude Code
-.claude/
+.claude/worktrees/
+.claude/settings.local.json

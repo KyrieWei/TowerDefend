@@ -5,6 +5,8 @@
 #include "HexGrid/TDHexGridManager.h"
 #include "HexGrid/TDHexTile.h"
 #include "HexGrid/TDHexCoord.h"
+#include "Building/TDBuildingManager.h"
+#include "Building/TDBuildingBase.h"
 
 #include "Unit/TDUnitBase.h"
 #include "Unit/TDUnitSquad.h"
@@ -155,10 +157,25 @@ void UTDCombatManager::Reset()
     DamageCalculator = nullptr;
     UnitAI = nullptr;
     UnitSquad = nullptr;
+    BuildingManager = nullptr;
     CachedResult = FTDRoundResult();
 
     UE_LOG(LogTDCombat, Verbose,
         TEXT("UTDCombatManager::Reset: Combat manager reset."));
+}
+
+// ===================================================================
+// 外部注入
+// ===================================================================
+
+void UTDCombatManager::SetBuildingManager(UTDBuildingManager* InBuildingManager)
+{
+    BuildingManager = InBuildingManager;
+}
+
+void UTDCombatManager::SetUnitSquad(UTDUnitSquad* InSquad)
+{
+    UnitSquad = InSquad;
 }
 
 // ===================================================================
@@ -226,16 +243,57 @@ bool UTDCombatManager::CheckCombatEnd() const
 
 void UTDCombatManager::ProcessBuildingAttacks(ATDHexGridManager* Grid)
 {
-    if (!Grid || !DamageCalculator || !UnitSquad)
+    if (!Grid || !DamageCalculator || !UnitSquad || !BuildingManager)
     {
         return;
     }
 
-    // TODO: 当 Building 模块就绪后，通过 BuildingManager 获取防守方建筑列表
-    // 并对每个可攻击建筑，查找攻击范围内的攻方单位，执行伤害计算
-    UE_LOG(LogTDCombat, Verbose,
-        TEXT("UTDCombatManager::ProcessBuildingAttacks: "
-             "Pending Building module integration."));
+    TArray<ATDBuildingBase*> DefenderBuildings =
+        BuildingManager->GetBuildingsByOwner(DefenderPlayerIndex);
+
+    for (ATDBuildingBase* Building : DefenderBuildings)
+    {
+        if (!IsValid(Building) || Building->IsDestroyed() || !Building->CanAttack())
+        {
+            continue;
+        }
+
+        FTDHexCoord BuildingCoord = Building->GetCoord();
+        int32 AttackRange = FMath::CeilToInt32(Building->GetAttackRange());
+        TArray<ATDUnitBase*> UnitsInRange =
+            UnitSquad->GetUnitsInRange(BuildingCoord, AttackRange);
+
+        ATDUnitBase* ClosestTarget = nullptr;
+        int32 ClosestDist = INT_MAX;
+
+        for (ATDUnitBase* Unit : UnitsInRange)
+        {
+            if (!IsValid(Unit) || Unit->IsDead()
+                || Unit->GetOwnerPlayerIndex() != AttackerPlayerIndex)
+            {
+                continue;
+            }
+
+            int32 Dist = BuildingCoord.DistanceTo(Unit->GetCurrentCoord());
+            if (Dist < ClosestDist)
+            {
+                ClosestDist = Dist;
+                ClosestTarget = Unit;
+            }
+        }
+
+        if (ClosestTarget)
+        {
+            int32 Damage = DamageCalculator->CalculateBuildingDamage(
+                Building, ClosestTarget, Grid);
+            ClosestTarget->ApplyDamage(Damage);
+
+            UE_LOG(LogTDCombat, Verbose,
+                TEXT("Building at %s dealt %d damage to unit at %s"),
+                *BuildingCoord.ToString(), Damage,
+                *ClosestTarget->GetCurrentCoord().ToString());
+        }
+    }
 }
 
 void UTDCombatManager::ProcessUnitActions(ATDHexGridManager* Grid)
@@ -272,8 +330,40 @@ void UTDCombatManager::ProcessUnitActions(ATDHexGridManager* Grid)
 
 bool UTDCombatManager::IsAttackerVictory() const
 {
-    // 守方基地被摧毁 = 攻方胜
-    // TODO: 当 Building 模块就绪后，检查守方主基地是否被摧毁
+    if (!BuildingManager)
+    {
+        return false;
+    }
+
+    TArray<ATDBuildingBase*> DefenderBuildings =
+        BuildingManager->GetBuildingsByOwner(DefenderPlayerIndex);
+
+    if (DefenderBuildings.Num() == 0)
+    {
+        UE_LOG(LogTDCombat, Log,
+            TEXT("UTDCombatManager: Attacker victory - defender has no buildings."));
+        return true;
+    }
+
+    bool bAllDestroyed = true;
+
+    for (const ATDBuildingBase* Building : DefenderBuildings)
+    {
+        if (IsValid(Building) && !Building->IsDestroyed())
+        {
+            bAllDestroyed = false;
+            break;
+        }
+    }
+
+    if (bAllDestroyed)
+    {
+        UE_LOG(LogTDCombat, Log,
+            TEXT("UTDCombatManager: Attacker victory - "
+                 "all defender buildings destroyed."));
+        return true;
+    }
+
     return false;
 }
 

@@ -11,6 +11,7 @@ class ATDUnitBase;
 class UTDUnitSquad;
 class UTDUnitAIController;
 class ATDBuildingBase;
+class UTDBuildingManager;
 class ATDHexGridManager;
 class UTDDamageCalculator;
 
@@ -137,6 +138,16 @@ public:
     void Reset();
 
     // ---------------------------------------------------------------
+    // 外部注入
+    // ---------------------------------------------------------------
+
+    /** Set the building manager for building attack queries. */
+    void SetBuildingManager(UTDBuildingManager* InBuildingManager);
+
+    /** Set the unit squad for unit queries. */
+    void SetUnitSquad(UTDUnitSquad* InSquad);
+
+    // ---------------------------------------------------------------
     // 委托
     // ---------------------------------------------------------------
 
@@ -192,6 +203,10 @@ protected:
 
     /** 关联的六边形网格管理器（弱引用，不可作为 UPROPERTY 反射）。 */
     TWeakObjectPtr<ATDHexGridManager> GridManager;
+
+    /** 建筑管理器引用（由外部注入）。 */
+    UPROPERTY()
+    UTDBuildingManager* BuildingManager = nullptr;
 
     /** 缓存的战斗结果（战斗结束时填充）。 */
     FTDRoundResult CachedResult;

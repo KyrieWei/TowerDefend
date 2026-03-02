@@ -9,6 +9,10 @@
 
 class ATDPlayerState;
 class UTDMatchmakingManager;
+class UTDCombatManager;
+class ATDHexGridManager;
+class UTDBuildingManager;
+class UTDUnitSquad;
 
 /**
  * 回合配对数据
@@ -38,11 +42,11 @@ struct FTDRoundPairing
  * 管理一个回合内的完整攻防流程：配对生成、战斗执行、结果收集。
  * 由 ATDGameMode 在服务端创建并持有，不做网络同步。
  *
- * 当前战斗执行为模拟实现（随机决定胜负），将来由 CombatManager 提供真实结果。
+ * 战斗执行委托给 CombatManager，未注入时回退到随机模拟。
  *
  * 使用流程：
  *   1. InitializeRound() — 传入存活玩家和回合号，自动生成配对
- *   2. ExecuteBattles()  — 执行战斗（当前为模拟）
+ *   2. ExecuteBattles()  — 执行战斗（通过 CombatManager 或回退模拟）
  *   3. GetRoundResults() — 获取本回合所有战斗结果
  *   4. Reset()           — 清空状态，准备下一回合
  */
@@ -70,8 +74,8 @@ public:
 
     /**
      * 执行战斗并生成结果
-     * 当前为模拟实现：随机决定胜负，固定伤害。
-     * 将来对接 CombatManager 后替换为真实战斗逻辑。
+     * 当 CombatManager 和 GridManager 已注入时使用真实战斗逻辑，
+     * 否则回退到随机模拟。
      */
     void ExecuteBattles();
 
@@ -83,6 +87,18 @@ public:
 
     /** 设置配对管理器（由外部注入，通常在对局初始化时设置） */
     void SetMatchmakingManager(UTDMatchmakingManager* InMatchmakingManager);
+
+    /** Set the combat manager reference */
+    void SetCombatManager(UTDCombatManager* InCombatManager);
+
+    /** Set the hex grid manager reference */
+    void SetGridManager(ATDHexGridManager* InGridManager);
+
+    /** Set the building manager reference */
+    void SetBuildingManager(UTDBuildingManager* InBuildingManager);
+
+    /** Set the unit squad reference */
+    void SetUnitSquad(UTDUnitSquad* InUnitSquad);
 
 private:
     /** 本回合的配对列表 */
@@ -101,4 +117,19 @@ private:
     /** 配对算法管理器引用（由外部注入） */
     UPROPERTY()
     TObjectPtr<UTDMatchmakingManager> MatchmakingManager;
+
+    /** 战斗管理器引用（由外部注入） */
+    UPROPERTY()
+    TObjectPtr<UTDCombatManager> CombatManager;
+
+    /** 六边形网格管理器引用（由外部注入） */
+    TWeakObjectPtr<ATDHexGridManager> GridManager;
+
+    /** 建筑管理器引用（由外部注入） */
+    UPROPERTY()
+    TObjectPtr<UTDBuildingManager> BuildingManager;
+
+    /** 单位编队管理器引用（由外部注入） */
+    UPROPERTY()
+    TObjectPtr<UTDUnitSquad> UnitSquad;
 };

@@ -3,6 +3,10 @@
 #include "TDRoundManager.h"
 #include "TDMatchmakingManager.h"
 #include "Core/TDPlayerState.h"
+#include "Combat/TDCombatManager.h"
+#include "HexGrid/TDHexGridManager.h"
+#include "Building/TDBuildingManager.h"
+#include "Unit/TDUnitSquad.h"
 
 void UTDRoundManager::InitializeRound(
     const TArray<ATDPlayerState*>& AlivePlayers,
@@ -71,25 +75,47 @@ void UTDRoundManager::ExecuteBattles()
             continue;
         }
 
-        // 模拟战斗结果：随机决定胜负
-        const bool bAttackerWins = FMath::RandBool();
-
         FTDRoundResult Result;
         Result.RoundNumber = CurrentRoundNumber;
         Result.AttackerPlayerIndex = Pairing.AttackerIndex;
         Result.DefenderPlayerIndex = Pairing.DefenderIndex;
-        Result.bAttackerWon = bAttackerWins;
-        // 模拟伤害：基础伤害 + 随机浮动
-        Result.DamageDealt = FMath::RandRange(5, 15);
+
+        ATDHexGridManager* Grid = GridManager.Get();
+
+        if (CombatManager && Grid)
+        {
+            CombatManager->InitializeCombat(
+                Pairing.AttackerIndex,
+                Pairing.DefenderIndex,
+                Grid);
+
+            CombatManager->SetBuildingManager(BuildingManager);
+            CombatManager->SetUnitSquad(UnitSquad);
+
+            FTDRoundResult CombatResult = CombatManager->ExecuteFullCombat();
+            Result.bAttackerWon = CombatResult.bAttackerWon;
+            Result.DamageDealt = CombatResult.DamageDealt;
+
+            CombatManager->Reset();
+        }
+        else
+        {
+            Result.bAttackerWon = FMath::RandBool();
+            Result.DamageDealt = FMath::RandRange(5, 15);
+            UE_LOG(LogTemp, Warning,
+                TEXT("UTDRoundManager::ExecuteBattles - "
+                     "Using simulated combat (CombatManager or Grid unavailable)"));
+        }
 
         CurrentRoundResults.Add(Result);
 
         UE_LOG(LogTemp, Log,
-            TEXT("UTDRoundManager::ExecuteBattles - Round %d: Player[%d] vs Player[%d] -> %s wins, Damage=%d"),
+            TEXT("UTDRoundManager::ExecuteBattles - "
+                 "Round %d: Player[%d] vs Player[%d] -> %s wins, Damage=%d"),
             CurrentRoundNumber,
             Pairing.AttackerIndex,
             Pairing.DefenderIndex,
-            bAttackerWins ? TEXT("Attacker") : TEXT("Defender"),
+            Result.bAttackerWon ? TEXT("Attacker") : TEXT("Defender"),
             Result.DamageDealt);
     }
 }
@@ -110,4 +136,24 @@ void UTDRoundManager::Reset()
 void UTDRoundManager::SetMatchmakingManager(UTDMatchmakingManager* InMatchmakingManager)
 {
     MatchmakingManager = InMatchmakingManager;
+}
+
+void UTDRoundManager::SetCombatManager(UTDCombatManager* InCombatManager)
+{
+    CombatManager = InCombatManager;
+}
+
+void UTDRoundManager::SetGridManager(ATDHexGridManager* InGridManager)
+{
+    GridManager = InGridManager;
+}
+
+void UTDRoundManager::SetBuildingManager(UTDBuildingManager* InBuildingManager)
+{
+    BuildingManager = InBuildingManager;
+}
+
+void UTDRoundManager::SetUnitSquad(UTDUnitSquad* InUnitSquad)
+{
+    UnitSquad = InUnitSquad;
 }

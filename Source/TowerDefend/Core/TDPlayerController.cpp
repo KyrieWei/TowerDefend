@@ -4,6 +4,11 @@
 #include "Core/TDCameraPawn.h"
 #include "Core/TDTerrainEditorComponent.h"
 #include "Core/TDMapFileManager.h"
+#include "Core/TDServerValidation.h"
+#include "Core/TDPlayerState.h"
+#include "Core/TDGameState.h"
+#include "Building/TDBuildingDataAsset.h"
+#include "Unit/TDUnitDataAsset.h"
 #include "HexGrid/TDHexCoord.h"
 #include "HexGrid/TDHexGridManager.h"
 #include "EnhancedInputComponent.h"
@@ -603,4 +608,62 @@ void ATDPlayerController::LoadMap(const FString& MapName)
                 FString::Printf(TEXT("Failed to load map: %s"), *MapName));
         }
     }
+}
+
+// ===================================================================
+// Server RPCs
+// ===================================================================
+
+bool ATDPlayerController::ServerRequestPlaceBuilding_Validate(
+    UTDBuildingDataAsset* BuildingData, FTDHexCoord Coord)
+{
+    return BuildingData != nullptr && Coord.IsValid();
+}
+
+void ATDPlayerController::ServerRequestPlaceBuilding_Implementation(
+    UTDBuildingDataAsset* BuildingData, FTDHexCoord Coord)
+{
+    UE_LOG(LogTDCamera, Log,
+        TEXT("ServerRequestPlaceBuilding: Player %s requests building at %s"),
+        *GetName(), *Coord.ToString());
+}
+
+bool ATDPlayerController::ServerRequestTrainUnit_Validate(
+    UTDUnitDataAsset* UnitData, int32 Count)
+{
+    return UnitData != nullptr && Count > 0 && Count <= 100;
+}
+
+void ATDPlayerController::ServerRequestTrainUnit_Implementation(
+    UTDUnitDataAsset* UnitData, int32 Count)
+{
+    UE_LOG(LogTDCamera, Log,
+        TEXT("ServerRequestTrainUnit: Player %s requests %d units"),
+        *GetName(), Count);
+}
+
+bool ATDPlayerController::ServerRequestResearchTech_Validate(FName TechID)
+{
+    return !TechID.IsNone();
+}
+
+void ATDPlayerController::ServerRequestResearchTech_Implementation(FName TechID)
+{
+    UE_LOG(LogTDCamera, Log,
+        TEXT("ServerRequestResearchTech: Player %s requests tech %s"),
+        *GetName(), *TechID.ToString());
+}
+
+bool ATDPlayerController::ServerRequestModifyTerrain_Validate(
+    FTDHexCoord Coord, int32 HeightDelta)
+{
+    return Coord.IsValid() && FMath::Abs(HeightDelta) <= 1;
+}
+
+void ATDPlayerController::ServerRequestModifyTerrain_Implementation(
+    FTDHexCoord Coord, int32 HeightDelta)
+{
+    UE_LOG(LogTDCamera, Log,
+        TEXT("ServerRequestModifyTerrain: Player %s requests terrain change at %s (delta=%d)"),
+        *GetName(), *Coord.ToString(), HeightDelta);
 }

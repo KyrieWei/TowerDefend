@@ -133,7 +133,16 @@ int32 ATDHexGridManager::GetTileCount() const
 TArray<ATDHexTile*> ATDHexGridManager::GetAllTiles() const
 {
     TArray<ATDHexTile*> Result;
-    TileMap.GenerateValueArray(Result);
+    Result.Reserve(TileMap.Num());
+
+    for (const auto& Pair : TileMap)
+    {
+        if (IsValid(Pair.Value))
+        {
+            Result.Add(Pair.Value);
+        }
+    }
+
     return Result;
 }
 

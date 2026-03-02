@@ -9,6 +9,12 @@
 
 class ATDGameState;
 class ATDPlayerState;
+class UTDMatchManager;
+class UTDRoundManager;
+class UTDResourceManager;
+class UTDRewardCalculator;
+class UTDMatchmakingManager;
+class ATDHexGridManager;
 
 /**
  * 对局游戏模式
@@ -107,7 +113,45 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TD|Config")
     FTDMatchConfig MatchConfig;
 
+    /** 对局管理器 -- 追踪回合历史和连胜/连败 */
+    UPROPERTY()
+    UTDMatchManager* MatchManager = nullptr;
+
+    /** 回合管理器 -- 配对和战斗执行 */
+    UPROPERTY()
+    UTDRoundManager* RoundManager = nullptr;
+
+    /** 资源管理器 -- 计算和发放回合收入 */
+    UPROPERTY()
+    UTDResourceManager* ResourceManager = nullptr;
+
+    /** 奖惩计算器 -- 计算胜负奖惩 */
+    UPROPERTY()
+    UTDRewardCalculator* RewardCalculator = nullptr;
+
+    /** 配对管理器 -- 生成玩家配对 */
+    UPROPERTY()
+    UTDMatchmakingManager* MatchmakingManager = nullptr;
+
 private:
+    /** 创建并初始化所有 Manager 子系统 */
+    void CreateManagers();
+
+    /** 获取场景中的 HexGridManager */
+    ATDHexGridManager* FindHexGridManager() const;
+
+    /** 处理单场战斗结果，应用奖惩和淘汰 */
+    void ProcessBattleResult(const FTDRoundResult& Result, ATDGameState* TDGameState);
+
+    /** 通过玩家索引查找 PlayerState */
+    ATDPlayerState* FindPlayerStateByIndex(int32 PlayerIndex) const;
+
+    /** 收集所有已连接的玩家 PlayerState */
+    TArray<ATDPlayerState*> GatherAllPlayerStates() const;
+
+    /** 收集所有存活的玩家 PlayerState */
+    TArray<ATDPlayerState*> GatherAlivePlayerStates() const;
+
     /** 设置当前阶段并同步到 GameState */
     void SetPhase(ETDGamePhase NewPhase);
 

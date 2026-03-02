@@ -23,6 +23,7 @@ void ATDGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
     DOREPLIFETIME(ATDGameState, PhaseEndTime);
     DOREPLIFETIME(ATDGameState, AlivePlayers);
     DOREPLIFETIME(ATDGameState, MatchConfig);
+    DOREPLIFETIME(ATDGameState, CurrentPairings);
 }
 
 // ─── 查询接口 ─────────────────────────────────────────
@@ -129,6 +130,16 @@ void ATDGameState::SetMatchConfig(const FTDMatchConfig& InConfig)
     }
 
     MatchConfig = InConfig;
+}
+
+void ATDGameState::SetCurrentPairings(const TArray<FTDRoundPairing>& InPairings)
+{
+    if (!HasAuthority())
+    {
+        return;
+    }
+
+    CurrentPairings = InPairings;
 }
 
 void ATDGameState::EliminatePlayer(ATDPlayerState* Player)

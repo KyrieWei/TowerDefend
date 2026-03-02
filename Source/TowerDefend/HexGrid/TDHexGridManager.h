@@ -125,6 +125,14 @@ public:
     int32 GetTileCount() const;
 
     /**
+     * 获取当前地图中所有 Tile Actor。
+     *
+     * @return  所有已注册的 Tile 数组。
+     */
+    UFUNCTION(BlueprintPure, Category = "HexGrid")
+    TArray<ATDHexTile*> GetAllTiles() const;
+
+    /**
      * 获取当前地图的有效半径。
      */
     UFUNCTION(BlueprintPure, Category = "HexGrid")

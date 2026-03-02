@@ -130,6 +130,22 @@ int32 ATDHexGridManager::GetTileCount() const
     return TileMap.Num();
 }
 
+TArray<ATDHexTile*> ATDHexGridManager::GetAllTiles() const
+{
+    TArray<ATDHexTile*> Result;
+    Result.Reserve(TileMap.Num());
+
+    for (const auto& Pair : TileMap)
+    {
+        if (IsValid(Pair.Value))
+        {
+            Result.Add(Pair.Value);
+        }
+    }
+
+    return Result;
+}
+
 // ===================================================================
 // 存档接口
 // ===================================================================

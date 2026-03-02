@@ -12,6 +12,8 @@ ATDPlayerState::ATDPlayerState()
     , bIsAlive(true)
     , WinCount(0)
     , LossCount(0)
+    , WinStreak(0)
+    , LoseStreak(0)
 {
 }
 
@@ -27,6 +29,8 @@ void ATDPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
     DOREPLIFETIME(ATDPlayerState, bIsAlive);
     DOREPLIFETIME(ATDPlayerState, WinCount);
     DOREPLIFETIME(ATDPlayerState, LossCount);
+    DOREPLIFETIME(ATDPlayerState, WinStreak);
+    DOREPLIFETIME(ATDPlayerState, LoseStreak);
 }
 
 // ─── 查询接口 ─────────────────────────────────────────
@@ -222,9 +226,29 @@ void ATDPlayerState::ResetForNewMatch(const FTDMatchConfig& MatchConfig)
     bIsAlive = true;
     WinCount = 0;
     LossCount = 0;
+    WinStreak = 0;
+    LoseStreak = 0;
 }
 
 // ─── RepNotify 回调 ───────────────────────────────────
+
+void ATDPlayerState::SetWinStreak(int32 InStreak)
+{
+    if (!HasAuthority())
+    {
+        return;
+    }
+    WinStreak = FMath::Max(0, InStreak);
+}
+
+void ATDPlayerState::SetLoseStreak(int32 InStreak)
+{
+    if (!HasAuthority())
+    {
+        return;
+    }
+    LoseStreak = FMath::Max(0, InStreak);
+}
 
 void ATDPlayerState::OnRep_Health(int32 OldValue)
 {

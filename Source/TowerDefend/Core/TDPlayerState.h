@@ -133,6 +133,18 @@ public:
     UFUNCTION(BlueprintPure, Category = "TD|Match")
     int32 GetLossCount() const { return LossCount; }
 
+    UFUNCTION(BlueprintPure, Category = "TD|Match")
+    int32 GetWinStreak() const { return WinStreak; }
+
+    UFUNCTION(BlueprintPure, Category = "TD|Match")
+    int32 GetLoseStreak() const { return LoseStreak; }
+
+    /** 设置连胜数（仅服务端调用）。 */
+    void SetWinStreak(int32 InStreak);
+
+    /** 设置连败数（仅服务端调用）。 */
+    void SetLoseStreak(int32 InStreak);
+
 protected:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -179,6 +191,14 @@ private:
     /** 失败次数 */
     UPROPERTY(Replicated)
     int32 LossCount;
+
+    /** 当前连胜数。 */
+    UPROPERTY(Replicated)
+    int32 WinStreak;
+
+    /** 当前连败数。 */
+    UPROPERTY(Replicated)
+    int32 LoseStreak;
 
     /** 内部：设置血量并触发通知 */
     void SetHealth(int32 NewHealth);

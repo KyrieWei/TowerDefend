@@ -13,6 +13,9 @@ struct FInputActionValue;
 struct FTDHexCoord;
 class ATDCameraPawn;
 class UTDTerrainEditorComponent;
+class UTDBuildingDataAsset;
+class UTDUnitDataAsset;
+class UTDServerValidation;
 
 /**
  * ATDPlayerController - 策略视角相机控制器。
@@ -102,6 +105,26 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "Camera")
     FTDHexCoord GetHexCoordUnderCursor(float HexSize) const;
+
+    // ---------------------------------------------------------------
+    // Server RPCs — 客户端请求操作，服务端执行验证
+    // ---------------------------------------------------------------
+
+    /** 请求放置建筑。 */
+    UFUNCTION(Server, Reliable, WithValidation, Category = "TD|Network")
+    void ServerRequestPlaceBuilding(UTDBuildingDataAsset* BuildingData, FTDHexCoord Coord);
+
+    /** 请求训练单位。 */
+    UFUNCTION(Server, Reliable, WithValidation, Category = "TD|Network")
+    void ServerRequestTrainUnit(UTDUnitDataAsset* UnitData, int32 Count);
+
+    /** 请求研究科技。 */
+    UFUNCTION(Server, Reliable, WithValidation, Category = "TD|Network")
+    void ServerRequestResearchTech(FName TechID);
+
+    /** 请求修改地形。 */
+    UFUNCTION(Server, Reliable, WithValidation, Category = "TD|Network")
+    void ServerRequestModifyTerrain(FTDHexCoord Coord, int32 HeightDelta);
 
 protected:
 
@@ -261,4 +284,8 @@ private:
 
     /** 当前是否按住快速移动键。 */
     bool bIsFastMoving;
+
+    /** 服务端操作验证器。 */
+    UPROPERTY()
+    TObjectPtr<UTDServerValidation> ServerValidation;
 };

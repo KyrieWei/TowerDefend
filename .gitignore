@@ -54,5 +54,12 @@ Content/HotReload/
 Plugins/AgentIntegrationKit/Source/ThirdParty/Bun/Win64/bun.exe
 Plugins/AgentIntegrationKit/Source/ThirdParty/Bun/Mac-arm64/bun
 
+# Python virtual environments, build metadata & logs
+.venv/
+__pycache__/
+*.egg-info/
+*.pyc
+*.log
+
 # Claude Code
 .claude/

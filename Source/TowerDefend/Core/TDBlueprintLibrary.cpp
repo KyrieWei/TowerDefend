@@ -1,0 +1,228 @@
+// Copyright TowerDefend. All Rights Reserved.
+
+#include "Core/TDBlueprintLibrary.h"
+
+#include "Core/TDGameState.h"
+#include "Core/TDGameMode.h"
+#include "Core/TDPlayerState.h"
+#include "Core/TDPlayerController.h"
+
+#include "Engine/World.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+
+// ═══════════════════════════════════════════════════════
+//  核心对象获取
+// ═══════════════════════════════════════════════════════
+
+ATDGameState* UTDBlueprintLibrary::GetTDGameState(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+	if (!World) return nullptr;
+	return Cast<ATDGameState>(World->GetGameState());
+}
+
+ATDGameMode* UTDBlueprintLibrary::GetTDGameMode(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+	if (!World) return nullptr;
+	return Cast<ATDGameMode>(World->GetAuthGameMode());
+}
+
+ATDPlayerState* UTDBlueprintLibrary::GetLocalTDPlayerState(const UObject* WorldContextObject)
+{
+	const ATDPlayerController* PC = GetLocalTDPlayerController(WorldContextObject);
+	return PC ? Cast<ATDPlayerState>(PC->PlayerState) : nullptr;
+}
+
+ATDPlayerController* UTDBlueprintLibrary::GetLocalTDPlayerController(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+	if (!World) return nullptr;
+	return Cast<ATDPlayerController>(World->GetFirstPlayerController());
+}
+
+ATDPlayerState* UTDBlueprintLibrary::GetTDPlayerStateByIndex(const UObject* WorldContextObject, int32 PlayerIndex)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	if (!GS) return nullptr;
+
+	const TArray<APlayerState*>& PlayerArray = GS->PlayerArray;
+	if (!PlayerArray.IsValidIndex(PlayerIndex)) return nullptr;
+
+	return Cast<ATDPlayerState>(PlayerArray[PlayerIndex]);
+}
+
+// ═══════════════════════════════════════════════════════
+//  游戏阶段 & 回合
+// ═══════════════════════════════════════════════════════
+
+ETDGamePhase UTDBlueprintLibrary::GetCurrentGamePhase(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->GetCurrentPhase() : ETDGamePhase::None;
+}
+
+int32 UTDBlueprintLibrary::GetCurrentRound(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->GetCurrentRound() : 0;
+}
+
+int32 UTDBlueprintLibrary::GetMaxRounds(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->GetMaxRounds() : 0;
+}
+
+float UTDBlueprintLibrary::GetPhaseRemainingTime(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->GetPhaseRemainingTime() : 0.0f;
+}
+
+bool UTDBlueprintLibrary::IsInPreparationPhase(const UObject* WorldContextObject)
+{
+	return GetCurrentGamePhase(WorldContextObject) == ETDGamePhase::Preparation;
+}
+
+bool UTDBlueprintLibrary::IsInBattlePhase(const UObject* WorldContextObject)
+{
+	return GetCurrentGamePhase(WorldContextObject) == ETDGamePhase::Battle;
+}
+
+bool UTDBlueprintLibrary::IsGameOver(const UObject* WorldContextObject)
+{
+	return GetCurrentGamePhase(WorldContextObject) == ETDGamePhase::GameOver;
+}
+
+FText UTDBlueprintLibrary::GetGamePhaseDisplayName(ETDGamePhase Phase)
+{
+	switch (Phase)
+	{
+	case ETDGamePhase::None:         return NSLOCTEXT("TD", "Phase_None", "未开始");
+	case ETDGamePhase::Preparation:  return NSLOCTEXT("TD", "Phase_Preparation", "准备阶段");
+	case ETDGamePhase::Matchmaking:  return NSLOCTEXT("TD", "Phase_Matchmaking", "配对阶段");
+	case ETDGamePhase::Battle:       return NSLOCTEXT("TD", "Phase_Battle", "战斗阶段");
+	case ETDGamePhase::Settlement:   return NSLOCTEXT("TD", "Phase_Settlement", "结算阶段");
+	case ETDGamePhase::GameOver:     return NSLOCTEXT("TD", "Phase_GameOver", "游戏结束");
+	default:                         return NSLOCTEXT("TD", "Phase_Unknown", "未知");
+	}
+}
+
+// ═══════════════════════════════════════════════════════
+//  本地玩家数据快捷访问
+// ═══════════════════════════════════════════════════════
+
+int32 UTDBlueprintLibrary::GetLocalPlayerGold(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetGold() : 0;
+}
+
+int32 UTDBlueprintLibrary::GetLocalPlayerHealth(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetHealth() : 0;
+}
+
+int32 UTDBlueprintLibrary::GetLocalPlayerMaxHealth(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetMaxHealth() : 0;
+}
+
+int32 UTDBlueprintLibrary::GetLocalPlayerResearchPoints(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetResearchPoints() : 0;
+}
+
+int32 UTDBlueprintLibrary::GetLocalPlayerTechEra(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetCurrentTechEra() : 0;
+}
+
+bool UTDBlueprintLibrary::IsLocalPlayerAlive(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->IsAlive() : false;
+}
+
+int32 UTDBlueprintLibrary::GetLocalPlayerWinCount(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetWinCount() : 0;
+}
+
+int32 UTDBlueprintLibrary::GetLocalPlayerLossCount(const UObject* WorldContextObject)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->GetLossCount() : 0;
+}
+
+bool UTDBlueprintLibrary::CanLocalPlayerAfford(const UObject* WorldContextObject, int32 Cost)
+{
+	const ATDPlayerState* PS = GetLocalTDPlayerState(WorldContextObject);
+	return PS ? PS->CanAfford(Cost) : false;
+}
+
+// ═══════════════════════════════════════════════════════
+//  对局信息
+// ═══════════════════════════════════════════════════════
+
+FTDMatchConfig UTDBlueprintLibrary::GetMatchConfig(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->GetMatchConfig() : FTDMatchConfig();
+}
+
+int32 UTDBlueprintLibrary::GetAlivePlayerCount(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->GetAlivePlayerCount() : 0;
+}
+
+TArray<ATDPlayerState*> UTDBlueprintLibrary::GetAllPlayerStates(const UObject* WorldContextObject)
+{
+	TArray<ATDPlayerState*> Result;
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	if (!GS) return Result;
+
+	for (APlayerState* PS : GS->PlayerArray)
+	{
+		if (ATDPlayerState* TDPS = Cast<ATDPlayerState>(PS))
+		{
+			Result.Add(TDPS);
+		}
+	}
+	return Result;
+}
+
+TArray<ATDPlayerState*> UTDBlueprintLibrary::GetAlivePlayerStates(const UObject* WorldContextObject)
+{
+	TArray<ATDPlayerState*> Result;
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	if (!GS) return Result;
+
+	for (APlayerState* PS : GS->PlayerArray)
+	{
+		ATDPlayerState* TDPS = Cast<ATDPlayerState>(PS);
+		if (TDPS && TDPS->IsAlive())
+		{
+			Result.Add(TDPS);
+		}
+	}
+	return Result;
+}
+
+int32 UTDBlueprintLibrary::GetTotalPlayerCount(const UObject* WorldContextObject)
+{
+	const ATDGameState* GS = GetTDGameState(WorldContextObject);
+	return GS ? GS->PlayerArray.Num() : 0;
+}

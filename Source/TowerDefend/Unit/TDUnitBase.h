@@ -147,11 +147,11 @@ public:
     /**
      * 判断目标坐标是否在攻击范围内。
      *
-     * @param TargetCoord  目标六边形坐标。
+     * @param InTargetCoord  目标六边形坐标。
      * @return             是否在攻击范围内。
      */
     UFUNCTION(BlueprintPure, Category = "TD|Unit|Combat")
-    bool IsInAttackRange(const FTDHexCoord& TargetCoord) const;
+    bool IsInAttackRange(const FTDHexCoord& InTargetCoord) const;
 
     /**
      * 计算对目标单位的最终伤害值。

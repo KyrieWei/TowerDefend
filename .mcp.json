@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "unreal-mcp": {
+      "type": "stdio",
+      "command": "C:/Users/kyriewei/.local/bin/uv.exe",
+      "args": [
+        "--directory",
+        "F:/TowerDefend/Plugins/UnrealMCP/Python",
+        "run",
+        "unreal_mcp_server.py"
+      ]
+    },
+    "unreal-editor": {
+      "type": "http",
+      "url": "http://127.0.0.1:9315/mcp"
+    }
+  }
+}

@@ -167,14 +167,14 @@ void ATDUnitBase::ApplyDamage(int32 Damage)
     }
 }
 
-bool ATDUnitBase::IsInAttackRange(const FTDHexCoord& TargetCoord) const
+bool ATDUnitBase::IsInAttackRange(const FTDHexCoord& InTargetCoord) const
 {
     if (!UnitData)
     {
         return false;
     }
 
-    int32 Distance = CurrentCoord.DistanceTo(TargetCoord);
+    int32 Distance = CurrentCoord.DistanceTo(InTargetCoord);
     return static_cast<float>(Distance) <= UnitData->AttackRange;
 }
 

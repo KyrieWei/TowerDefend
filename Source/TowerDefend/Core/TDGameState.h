@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "TDGamePhaseTypes.h"
+#include "Match/TDRoundManager.h"
 #include "TDGameState.generated.h"
 
 class ATDPlayerState;
@@ -84,6 +85,12 @@ public:
     /** 设置对局配置 */
     void SetMatchConfig(const FTDMatchConfig& InConfig);
 
+    /** 设置当前配对信息 */
+    void SetCurrentPairings(const TArray<FTDRoundPairing>& InPairings);
+
+    /** 获取当前配对信息 */
+    const TArray<FTDRoundPairing>& GetCurrentPairings() const { return CurrentPairings; }
+
     /** 淘汰玩家 — 从存活列表移除并广播事件 */
     void EliminatePlayer(ATDPlayerState* Player);
 
@@ -142,4 +149,8 @@ private:
     /** 对局配置（Replicated 以便客户端读取） */
     UPROPERTY(Replicated)
     FTDMatchConfig MatchConfig;
+
+    /** 当前回合配对信息（Replicated 以便客户端显示对阵表） */
+    UPROPERTY(Replicated)
+    TArray<FTDRoundPairing> CurrentPairings;
 };

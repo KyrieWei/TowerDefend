@@ -4,6 +4,13 @@
 #include "TDGameState.h"
 #include "TDPlayerState.h"
 #include "TimerManager.h"
+#include "Match/TDMatchManager.h"
+#include "Match/TDRoundManager.h"
+#include "Match/TDMatchmakingManager.h"
+#include "Economy/TDResourceManager.h"
+#include "Economy/TDRewardCalculator.h"
+#include "HexGrid/TDHexGridManager.h"
+#include "Kismet/GameplayStatics.h"
 
 ATDGameMode::ATDGameMode()
     : CurrentPhase(ETDGamePhase::None)
@@ -60,23 +67,24 @@ void ATDGameMode::StartMatch()
     }
 
     // 初始化所有已连接的玩家
-    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    TArray<ATDPlayerState*> AllPlayers = GatherAllPlayerStates();
+    for (ATDPlayerState* PlayerState : AllPlayers)
     {
-        APlayerController* PC = It->Get();
-        if (!IsValid(PC))
-        {
-            continue;
-        }
-
-        ATDPlayerState* PlayerState = Cast<ATDPlayerState>(PC->PlayerState);
-        if (IsValid(PlayerState))
-        {
-            InitializePlayerForMatch(PlayerState);
-        }
+        InitializePlayerForMatch(PlayerState);
     }
 
     // 重置回合计数，开始第一回合
     CurrentRound = 0;
+
+    // Create subsystem managers
+    CreateManagers();
+
+    // Initialize match manager with all alive players
+    if (MatchManager)
+    {
+        MatchManager->InitializeMatch(AllPlayers, MatchConfig);
+    }
+
     StartNewRound();
 }
 
@@ -170,22 +178,13 @@ void ATDGameMode::OnPreparationPhaseStarted()
 {
     UE_LOG(LogTemp, Log, TEXT("ATDGameMode::OnPreparationPhaseStarted - Round %d"), CurrentRound);
 
-    // 发放回合基础资源（第一回合不发放，因为 ResetForNewMatch 已设置初始资源）
-    if (CurrentRound > 1)
+    // Grant round resources via ResourceManager (skip round 1 -- ResetForNewMatch set initial resources)
+    if (CurrentRound > 1 && ResourceManager)
     {
-        for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+        TArray<ATDPlayerState*> AlivePlayers = GatherAlivePlayerStates();
+        for (ATDPlayerState* PlayerState : AlivePlayers)
         {
-            APlayerController* PC = It->Get();
-            if (!IsValid(PC))
-            {
-                continue;
-            }
-
-            ATDPlayerState* PlayerState = Cast<ATDPlayerState>(PC->PlayerState);
-            if (IsValid(PlayerState) && PlayerState->IsAlive())
-            {
-                PlayerState->AddGold(MatchConfig.GoldPerRound);
-            }
+            ResourceManager->GrantRoundResources(PlayerState, MatchConfig);
         }
     }
 
@@ -196,14 +195,36 @@ void ATDGameMode::OnMatchmakingPhaseStarted()
 {
     UE_LOG(LogTemp, Log, TEXT("ATDGameMode::OnMatchmakingPhaseStarted - Round %d"), CurrentRound);
 
-    // 配对逻辑当前为占位，后续由 MatchmakingManager 实现
-    // 配对阶段无倒计时，自动推进到战斗
+    // Generate pairings via RoundManager
+    if (RoundManager && MatchManager)
+    {
+        TArray<ATDPlayerState*> AlivePlayers = GatherAlivePlayerStates();
+        RoundManager->InitializeRound(AlivePlayers, CurrentRound, MatchManager->GetRoundHistory());
+
+        // Replicate pairings to GameState for client display
+        ATDGameState* TDGameState = GetTDGameState();
+        if (IsValid(TDGameState))
+        {
+            TDGameState->SetCurrentPairings(RoundManager->GetCurrentPairings());
+        }
+
+        UE_LOG(LogTemp, Log, TEXT("ATDGameMode::OnMatchmakingPhaseStarted - Generated %d pairings"),
+            RoundManager->GetCurrentPairings().Num());
+    }
+
+    // Matchmaking is instant, advance immediately
     AdvanceToNextPhase();
 }
 
 void ATDGameMode::OnBattlePhaseStarted()
 {
     UE_LOG(LogTemp, Log, TEXT("ATDGameMode::OnBattlePhaseStarted - Round %d"), CurrentRound);
+
+    // Execute battles via RoundManager
+    if (RoundManager)
+    {
+        RoundManager->ExecuteBattles();
+    }
 
     StartPhaseTimer(MatchConfig.BattleTime);
 }
@@ -212,8 +233,27 @@ void ATDGameMode::OnSettlementPhaseStarted()
 {
     UE_LOG(LogTemp, Log, TEXT("ATDGameMode::OnSettlementPhaseStarted - Round %d"), CurrentRound);
 
-    // 结算逻辑当前为占位，后续根据战斗结果执行 ApplyRoundReward
-    // 结算阶段无倒计时，处理完毕后自动推进
+    if (!RoundManager || !RewardCalculator || !MatchManager)
+    {
+        UE_LOG(LogTemp, Error, TEXT("ATDGameMode::OnSettlementPhaseStarted - Managers not initialized"));
+        AdvanceToNextPhase();
+        return;
+    }
+
+    ATDGameState* TDGameState = GetTDGameState();
+
+    // Process each battle result
+    const TArray<FTDRoundResult>& Results = RoundManager->GetRoundResults();
+    for (const FTDRoundResult& Result : Results)
+    {
+        MatchManager->RecordRoundResult(Result);
+        ProcessBattleResult(Result, TDGameState);
+    }
+
+    // Advance the round counter in MatchManager
+    MatchManager->AdvanceRound();
+
+    // Auto-advance from settlement
     AdvanceToNextPhase();
 }
 
@@ -223,6 +263,118 @@ void ATDGameMode::OnGameOverPhaseStarted()
 }
 
 // ─── 内部辅助 ─────────────────────────────────────────
+
+void ATDGameMode::CreateManagers()
+{
+    MatchManager = NewObject<UTDMatchManager>(this);
+    RoundManager = NewObject<UTDRoundManager>(this);
+    ResourceManager = NewObject<UTDResourceManager>(this);
+    RewardCalculator = NewObject<UTDRewardCalculator>(this);
+    MatchmakingManager = NewObject<UTDMatchmakingManager>(this);
+
+    // Wire up the matchmaking manager into round manager
+    RoundManager->SetMatchmakingManager(MatchmakingManager);
+
+    UE_LOG(LogTemp, Log, TEXT("ATDGameMode::CreateManagers - All managers created."));
+}
+
+ATDHexGridManager* ATDGameMode::FindHexGridManager() const
+{
+    return Cast<ATDHexGridManager>(
+        UGameplayStatics::GetActorOfClass(GetWorld(), ATDHexGridManager::StaticClass()));
+}
+
+void ATDGameMode::ProcessBattleResult(const FTDRoundResult& Result, ATDGameState* TDGameState)
+{
+    const int32 WinnerIndex = Result.bAttackerWon ? Result.AttackerPlayerIndex : Result.DefenderPlayerIndex;
+    const int32 LoserIndex = Result.bAttackerWon ? Result.DefenderPlayerIndex : Result.AttackerPlayerIndex;
+
+    ATDPlayerState* WinnerPS = FindPlayerStateByIndex(WinnerIndex);
+    ATDPlayerState* LoserPS = FindPlayerStateByIndex(LoserIndex);
+
+    // Calculate and apply rewards for winner
+    if (WinnerPS)
+    {
+        FTDRoundReward WinReward = RewardCalculator->CalculateRoundReward(
+            Result, MatchConfig, CurrentRound,
+            MatchManager->GetPlayerWinStreak(WinnerIndex), 0);
+        if (WinReward.GoldDelta > 0) { WinnerPS->AddGold(WinReward.GoldDelta); }
+        if (WinReward.ResearchPointDelta > 0) { WinnerPS->AddResearchPoints(WinReward.ResearchPointDelta); }
+    }
+
+    // Calculate and apply penalties for loser
+    if (LoserPS)
+    {
+        FTDRoundReward LoseReward = RewardCalculator->CalculateRoundReward(
+            Result, MatchConfig, CurrentRound,
+            0, MatchManager->GetPlayerLoseStreak(LoserIndex));
+        if (LoseReward.GoldDelta > 0) { LoserPS->AddGold(LoseReward.GoldDelta); }
+        if (LoseReward.HealthDelta < 0) { LoserPS->ApplyDamage(-LoseReward.HealthDelta); }
+
+        // Check for elimination
+        if (LoserPS->IsDead() && IsValid(TDGameState))
+        {
+            TDGameState->EliminatePlayer(LoserPS);
+            MatchManager->MarkPlayerEliminated(LoserIndex);
+        }
+    }
+}
+
+ATDPlayerState* ATDGameMode::FindPlayerStateByIndex(int32 PlayerIndex) const
+{
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (!IsValid(PC))
+        {
+            continue;
+        }
+        ATDPlayerState* PS = Cast<ATDPlayerState>(PC->PlayerState);
+        if (IsValid(PS) && PS->GetPlayerId() == PlayerIndex)
+        {
+            return PS;
+        }
+    }
+    return nullptr;
+}
+
+TArray<ATDPlayerState*> ATDGameMode::GatherAllPlayerStates() const
+{
+    TArray<ATDPlayerState*> Result;
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (!IsValid(PC))
+        {
+            continue;
+        }
+        ATDPlayerState* PS = Cast<ATDPlayerState>(PC->PlayerState);
+        if (IsValid(PS))
+        {
+            Result.Add(PS);
+        }
+    }
+    return Result;
+}
+
+TArray<ATDPlayerState*> ATDGameMode::GatherAlivePlayerStates() const
+{
+    TArray<ATDPlayerState*> Result;
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (!IsValid(PC))
+        {
+            continue;
+        }
+        ATDPlayerState* PS = Cast<ATDPlayerState>(PC->PlayerState);
+        if (IsValid(PS) && PS->IsAlive())
+        {
+            Result.Add(PS);
+        }
+    }
+    return Result;
+}
 
 void ATDGameMode::SetPhase(ETDGamePhase NewPhase)
 {

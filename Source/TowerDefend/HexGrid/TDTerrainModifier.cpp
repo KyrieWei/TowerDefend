@@ -3,6 +3,7 @@
 #include "HexGrid/TDTerrainModifier.h"
 #include "HexGrid/TDHexGridManager.h"
 #include "HexGrid/TDHexTile.h"
+#include "TechTree/TDTechTreeIntegration.h"
 
 // ===================================================================
 // 高度修改
@@ -166,4 +167,26 @@ bool UTDTerrainModifier::ApplyHeightChange(ATDHexGridManager* Grid,
         *Coord.ToString(), HeightDelta, NewHeight);
 
     return true;
+}
+
+// ===================================================================
+// 科技树集成
+// ===================================================================
+
+void UTDTerrainModifier::SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration)
+{
+    TechIntegration = InTechIntegration;
+}
+
+bool UTDTerrainModifier::ValidateTechLevel(int32 PlayerIndex, int32 HeightDelta) const
+{
+    if (!TechIntegration)
+    {
+        return true; // No tech restrictions if not set
+    }
+
+    const int32 RequiredLevel = FMath::Abs(HeightDelta);
+    const int32 UnlockedLevel = TechIntegration->GetTerrainModifyLevelForPlayer(PlayerIndex);
+
+    return UnlockedLevel >= RequiredLevel;
 }

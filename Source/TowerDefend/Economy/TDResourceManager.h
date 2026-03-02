@@ -8,6 +8,9 @@
 #include "Core/TDGamePhaseTypes.h"
 #include "TDResourceManager.generated.h"
 
+class UTDBuildingManager;
+class UTDTechTreeIntegration;
+
 /**
  * UTDResourceManager - 资源管理器。
  *
@@ -104,4 +107,22 @@ public:
     void GrantRoundResources(
         ATDPlayerState* Player,
         const FTDMatchConfig& Config) const;
+
+    // ---------------------------------------------------------------
+    // 外部系统引用
+    // ---------------------------------------------------------------
+
+    /** 建筑管理器引用，用于计算建筑产出。 */
+    UPROPERTY()
+    UTDBuildingManager* BuildingManagerRef = nullptr;
+
+    /** 科技树集成引用，用于应用科技加成。 */
+    UPROPERTY()
+    UTDTechTreeIntegration* TechIntegration = nullptr;
+
+    /** 设置建筑管理器引用。 */
+    void SetBuildingManager(UTDBuildingManager* InBuildingManager);
+
+    /** 设置科技树集成引用。 */
+    void SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration);
 };

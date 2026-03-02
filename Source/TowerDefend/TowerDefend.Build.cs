@@ -10,6 +10,6 @@ public class TowerDefend : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] { ModuleDirectory });
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Json", "JsonUtilities" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Json", "JsonUtilities", "UMG", "Slate", "SlateCore" });
 	}
 }

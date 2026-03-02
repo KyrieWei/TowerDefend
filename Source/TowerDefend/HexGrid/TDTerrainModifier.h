@@ -9,6 +9,7 @@
 #include "TDTerrainModifier.generated.h"
 
 class ATDHexGridManager;
+class UTDTechTreeIntegration;
 
 /**
  * UTDTerrainModifier - 运行时地形修改器。
@@ -89,6 +90,25 @@ public:
     UFUNCTION(BlueprintPure, Category = "TerrainModifier")
     bool ValidateModification(const ATDHexGridManager* Grid,
         const FTDHexCoord& Coord, int32 HeightDelta) const;
+
+    // ---------------------------------------------------------------
+    // 科技树集成
+    // ---------------------------------------------------------------
+
+    /** 科技树集成引用，用于限制地形修改等级。 */
+    UPROPERTY()
+    UTDTechTreeIntegration* TechIntegration = nullptr;
+
+    /** 设置科技树集成引用。 */
+    void SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration);
+
+    /**
+     * 验证玩家是否有足够的科技等级执行地形修改。
+     * @param PlayerIndex 执行修改的玩家索引。
+     * @param HeightDelta 高度变化量的绝对值。
+     * @return 是否允许修改。
+     */
+    bool ValidateTechLevel(int32 PlayerIndex, int32 HeightDelta) const;
 
 private:
     /** 单次操作允许的最大高度变化绝对值。 */

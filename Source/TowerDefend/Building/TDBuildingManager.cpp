@@ -8,6 +8,7 @@
 #include "HexGrid/TDHexGridManager.h"
 #include "HexGrid/TDHexTile.h"
 #include "HexGrid/TDHexCoord.h"
+#include "TechTree/TDTechTreeIntegration.h"
 #include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTDBuildingMgr, Log, All);
@@ -171,7 +172,24 @@ bool UTDBuildingManager::CanPlaceBuilding(
         return false;
     }
 
+    // 7. Tech tree unlock check
+    if (TechIntegration && InBuildingData)
+    {
+        if (!TechIntegration->IsBuildingUnlockedForPlayer(InOwnerPlayerIndex, InBuildingData->BuildingID))
+        {
+            UE_LOG(LogTDBuildingMgr, Warning,
+                TEXT("CanPlaceBuilding: Building '%s' not unlocked for player %d."),
+                *InBuildingData->BuildingID.ToString(), InOwnerPlayerIndex);
+            return false;
+        }
+    }
+
     return true;
+}
+
+void UTDBuildingManager::SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration)
+{
+    TechIntegration = InTechIntegration;
 }
 
 bool UTDBuildingManager::RemoveBuilding(const FTDHexCoord& InCoord)

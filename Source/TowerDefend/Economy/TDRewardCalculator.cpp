@@ -2,6 +2,7 @@
 
 #include "Economy/TDRewardCalculator.h"
 #include "Core/TDGamePhaseTypes.h"
+#include "TechTree/TDTechTreeIntegration.h"
 
 // ===================================================================
 // 核心接口
@@ -79,4 +80,40 @@ int32 UTDRewardCalculator::CalculateLoseStreakCompensation(int32 LoseStreak) con
 
     const int32 RawCompensation = LoseStreak * LoseStreakCompensationPerStack;
     return FMath::Min(RawCompensation, MaxLoseStreakCompensation);
+}
+
+// ===================================================================
+// 科技树集成
+// ===================================================================
+
+void UTDRewardCalculator::SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration)
+{
+    TechIntegration = InTechIntegration;
+}
+
+FTDRoundReward UTDRewardCalculator::CalculateRoundRewardWithTech(
+    const FTDRoundResult& RoundResult,
+    const FTDMatchConfig& Config,
+    int32 CurrentRound,
+    int32 WinStreak,
+    int32 LoseStreak,
+    int32 PlayerIndex) const
+{
+    // Start with base calculation
+    FTDRoundReward Reward = CalculateRoundReward(
+        RoundResult, Config, CurrentRound, WinStreak, LoseStreak);
+
+    // Apply tech resource bonus to gold rewards
+    if (TechIntegration && Reward.GoldDelta > 0)
+    {
+        const float ResourceBonus = TechIntegration->GetResourceBonusForPlayer(PlayerIndex);
+        if (ResourceBonus > 0.0f)
+        {
+            const int32 BonusGold = FMath::FloorToInt32(
+                static_cast<float>(Reward.GoldDelta) * ResourceBonus / 100.0f);
+            Reward.GoldDelta += BonusGold;
+        }
+    }
+
+    return Reward;
 }

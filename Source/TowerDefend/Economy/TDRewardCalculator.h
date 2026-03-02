@@ -7,6 +7,8 @@
 #include "Core/TDGamePhaseTypes.h"
 #include "TDRewardCalculator.generated.h"
 
+class UTDTechTreeIntegration;
+
 // ===================================================================
 // FTDRoundReward - 回合奖惩结果
 // ===================================================================
@@ -123,6 +125,27 @@ public:
     int32 CalculateLoseDamage(
         const FTDMatchConfig& Config,
         int32 CurrentRound) const;
+
+    // ---------------------------------------------------------------
+    // 科技树集成
+    // ---------------------------------------------------------------
+
+    /** 科技树集成引用，用于应用科技奖励加成。 */
+    UPROPERTY()
+    UTDTechTreeIntegration* TechIntegration = nullptr;
+
+    /** 设置科技树集成引用。 */
+    void SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration);
+
+    /** 计算回合奖惩（带科技加成）。 */
+    UFUNCTION(BlueprintPure, Category = "RewardCalculator")
+    FTDRoundReward CalculateRoundRewardWithTech(
+        const FTDRoundResult& RoundResult,
+        const FTDMatchConfig& Config,
+        int32 CurrentRound,
+        int32 WinStreak,
+        int32 LoseStreak,
+        int32 PlayerIndex) const;
 
 private:
     /**

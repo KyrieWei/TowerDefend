@@ -10,6 +10,7 @@ class ATDBuildingBase;
 class UTDBuildingDataAsset;
 class ATDHexGridManager;
 class ATDHexTile;
+class UTDTechTreeIntegration;
 
 /**
  * UTDBuildingManager - 建筑管理器。
@@ -156,6 +157,17 @@ public:
     /** 移除并销毁所有建筑。 */
     UFUNCTION(BlueprintCallable, Category = "Building|Manager")
     void ClearAllBuildings();
+
+    // ---------------------------------------------------------------
+    // 科技树集成
+    // ---------------------------------------------------------------
+
+    /** 科技树集成引用（可选，由外部注入）。 */
+    UPROPERTY()
+    UTDTechTreeIntegration* TechIntegration = nullptr;
+
+    /** 设置科技树集成引用。 */
+    void SetTechTreeIntegration(UTDTechTreeIntegration* InTechIntegration);
 
 private:
 

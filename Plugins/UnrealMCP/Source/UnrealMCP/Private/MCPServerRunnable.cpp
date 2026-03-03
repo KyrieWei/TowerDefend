@@ -12,7 +12,7 @@
 #include "HAL/PlatformTime.h"
 
 // Buffer size for receiving data
-const int32 BufferSize = 8192;
+static const int32 MCPBufferSize = 8192;
 
 FMCPServerRunnable::FMCPServerRunnable(UUnrealMCPBridge* InBridge, TSharedPtr<FSocket> InListenerSocket)
     : Bridge(InBridge)

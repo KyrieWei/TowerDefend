@@ -1,8 +1,10 @@
 // Copyright TowerDefend. All Rights Reserved.
 
 #include "HexGrid/TDHexTile.h"
+#include "HexGrid/TDHexGridManager.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "ProceduralMeshComponent.h"
 
 ATDHexTile::ATDHexTile()
 {
@@ -27,6 +29,7 @@ void ATDHexTile::InitFromSaveData(const FTDHexTileSaveData& InSaveData, float He
     TerrainType = InSaveData.TerrainType;
     HeightLevel = FMath::Clamp(InSaveData.HeightLevel, MinHeightLevel, MaxHeightLevel);
     OwnerPlayerIndex = InSaveData.OwnerPlayerIndex;
+    CachedHexSize = HexSize;
 
     // 不在此处设置位置 —— 位置由 GridManager::SpawnTilesFromData 在 Spawn 时决定。
     // 仅确保 Z 轴高度与内部数据一致。
@@ -60,6 +63,12 @@ void ATDHexTile::SetHeightLevel(int32 NewHeight)
 
     HeightLevel = ClampedHeight;
     UpdateVisualHeight();
+
+    // 通知 GridManager 更新本格及邻居的侧面裙边
+    if (ATDHexGridManager* Grid = OwnerGridManager.Get())
+    {
+        Grid->NotifyTileHeightChanged(Coord);
+    }
 }
 
 void ATDHexTile::SetOwnerPlayerIndex(int32 NewOwner)
@@ -237,5 +246,194 @@ FLinearColor ATDHexTile::GetTerrainBaseColor(ETDTerrainType Type)
 
     default:
         return FLinearColor::White;
+    }
+}
+
+// ===================================================================
+// GridManager 引用
+// ===================================================================
+
+void ATDHexTile::SetGridManager(ATDHexGridManager* InGridManager)
+{
+    OwnerGridManager = InGridManager;
+}
+
+// ===================================================================
+// 侧面裙边（Side Skirt）
+// ===================================================================
+
+void ATDHexTile::EnsureSideSkirtMesh()
+{
+    if (!SideSkirtMesh)
+    {
+        SideSkirtMesh = NewObject<UProceduralMeshComponent>(this, TEXT("SideSkirtMesh"));
+        SideSkirtMesh->SetupAttachment(GetRootComponent());
+        SideSkirtMesh->RegisterComponent();
+
+        // 侧面无需碰撞
+        SideSkirtMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        SideSkirtMesh->bUseAsyncCooking = true;
+        SideSkirtMesh->SetCastShadow(false);
+    }
+}
+
+FVector2D ATDHexTile::GetHexVertex(int32 Index, float InHexSize)
+{
+    // 平顶六边形：顶点 i 的角度 = 60 * i 度
+    const float AngleDeg = 60.0f * static_cast<float>(Index);
+    const float AngleRad = FMath::DegreesToRadians(AngleDeg);
+    return FVector2D(
+        InHexSize * FMath::Cos(AngleRad),
+        InHexSize * FMath::Sin(AngleRad)
+    );
+}
+
+TPair<int32, int32> ATDHexTile::GetEdgeVertexIndices(int32 DirIndex)
+{
+    // 方向-边对应关系（平顶六边形）：
+    // Dir 0 (E):  V5 - V0
+    // Dir 1 (NE): V0 - V1
+    // Dir 2 (NW): V1 - V2
+    // Dir 3 (W):  V2 - V3
+    // Dir 4 (SW): V3 - V4
+    // Dir 5 (SE): V4 - V5
+    const int32 Start = (DirIndex + 5) % 6;  // = DirIndex - 1 mod 6
+    const int32 End = DirIndex % 6;
+    return TPair<int32, int32>(Start, End);
+}
+
+void ATDHexTile::RebuildSideSkirt()
+{
+    ATDHexGridManager* Grid = OwnerGridManager.Get();
+    if (!Grid)
+    {
+        return;
+    }
+
+    // 收集需要生成侧面的边
+    TArray<FVector> Vertices;
+    TArray<int32> Triangles;
+    TArray<FVector> Normals;
+    TArray<FVector2D> UVs;
+    TArray<FColor> VertexColors;
+
+    int32 VertexCount = 0;
+    const float MyZ = 0.0f;  // 本格顶面在本地空间 Z=0
+
+    for (int32 Dir = 0; Dir < 6; ++Dir)
+    {
+        // 获取该方向的邻居
+        const FTDHexCoord NeighborCoord = Coord.GetNeighbor(Dir);
+        ATDHexTile* Neighbor = Grid->GetTileAt(NeighborCoord);
+
+        // 计算邻居高度（无邻居时取 MinHeightLevel - 1）
+        const int32 NeighborHeight = Neighbor ? Neighbor->GetHeightLevel() : (MinHeightLevel - 1);
+
+        // 只在本格高于邻格时生成侧面
+        if (HeightLevel <= NeighborHeight)
+        {
+            continue;
+        }
+
+        // 高度差对应的本地 Z 偏移（邻格相对于本格的 Z 差，为负值）
+        const float BottomZ = static_cast<float>(NeighborHeight - HeightLevel) * HeightLevelUnitZ;
+
+        // 获取边的两个顶点
+        const TPair<int32, int32> Edge = GetEdgeVertexIndices(Dir);
+        const FVector2D V0_2D = GetHexVertex(Edge.Key, CachedHexSize);
+        const FVector2D V1_2D = GetHexVertex(Edge.Value, CachedHexSize);
+
+        // 四个顶点（本地空间，Tile 原点在顶面中心）
+        // P0: 顶面左端, P1: 顶面右端, P2: 底面右端, P3: 底面左端
+        const FVector P0(V0_2D.X, V0_2D.Y, MyZ);
+        const FVector P1(V1_2D.X, V1_2D.Y, MyZ);
+        const FVector P2(V1_2D.X, V1_2D.Y, BottomZ);
+        const FVector P3(V0_2D.X, V0_2D.Y, BottomZ);
+
+        // 计算外法线（从中心指向边中点的 XY 方向）
+        const FVector EdgeMid = (P0 + P1) * 0.5f;
+        FVector Normal(EdgeMid.X, EdgeMid.Y, 0.0f);
+        Normal.Normalize();
+
+        // UV 坐标：简单映射
+        const float HeightDiffUnits = static_cast<float>(HeightLevel - NeighborHeight);
+        const FVector2D UV0(0.0f, 0.0f);
+        const FVector2D UV1(1.0f, 0.0f);
+        const FVector2D UV2(1.0f, HeightDiffUnits);
+        const FVector2D UV3(0.0f, HeightDiffUnits);
+
+        // 顶点颜色：使用当前地形的基础颜色
+        const FLinearColor BaseColor = GetTerrainBaseColor(TerrainType);
+        const FColor VColor = BaseColor.ToFColor(true);
+
+        // 添加 4 个顶点
+        const int32 BaseIdx = VertexCount;
+        Vertices.Add(P0);
+        Vertices.Add(P1);
+        Vertices.Add(P2);
+        Vertices.Add(P3);
+
+        Normals.Add(Normal);
+        Normals.Add(Normal);
+        Normals.Add(Normal);
+        Normals.Add(Normal);
+
+        UVs.Add(UV0);
+        UVs.Add(UV1);
+        UVs.Add(UV2);
+        UVs.Add(UV3);
+
+        VertexColors.Add(VColor);
+        VertexColors.Add(VColor);
+        VertexColors.Add(VColor);
+        VertexColors.Add(VColor);
+
+        // 两个三角形（顺时针绕序，法线朝外）
+        // Triangle A: P0, P1, P2
+        Triangles.Add(BaseIdx + 0);
+        Triangles.Add(BaseIdx + 1);
+        Triangles.Add(BaseIdx + 2);
+        // Triangle B: P0, P2, P3
+        Triangles.Add(BaseIdx + 0);
+        Triangles.Add(BaseIdx + 2);
+        Triangles.Add(BaseIdx + 3);
+
+        VertexCount += 4;
+    }
+
+    // 如果没有需要生成的侧面，清除已有 Mesh
+    if (Vertices.Num() == 0)
+    {
+        if (SideSkirtMesh)
+        {
+            SideSkirtMesh->ClearAllMeshSections();
+        }
+        return;
+    }
+
+    // 确保组件存在
+    EnsureSideSkirtMesh();
+
+    // 写入 ProceduralMesh Section 0
+    SideSkirtMesh->ClearAllMeshSections();
+    SideSkirtMesh->CreateMeshSection(
+        0,                   // SectionIndex
+        Vertices,
+        Triangles,
+        Normals,
+        UVs,
+        VertexColors,
+        TArray<FProcMeshTangent>(),
+        false                // bCreateCollision
+    );
+
+    // 应用材质：使用 HexMeshComponent 当前的材质
+    if (HexMeshComponent)
+    {
+        UMaterialInterface* CurrentMat = HexMeshComponent->GetMaterial(0);
+        if (CurrentMat)
+        {
+            SideSkirtMesh->SetMaterial(0, CurrentMat);
+        }
     }
 }

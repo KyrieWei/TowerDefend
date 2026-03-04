@@ -8,6 +8,9 @@
 #include "HexGrid/TDHexGridSaveData.h"
 #include "TDHexTile.generated.h"
 
+class UProceduralMeshComponent;
+class ATDHexGridManager;
+
 /**
  * ATDHexTile - 六边形格子 Actor。
  *
@@ -40,6 +43,22 @@ public:
      * @param HexSize     六边形外接圆半径（世界单位），用于坐标→世界位置转换。
      */
     void InitFromSaveData(const FTDHexTileSaveData& InSaveData, float HexSize);
+
+    /**
+     * 设置所属 GridManager 引用，用于查询邻居信息。
+     * 在 GridManager::SpawnTilesFromData 中 Spawn 完成后调用。
+     *
+     * @param InGridManager  所属的网格管理器。
+     */
+    void SetGridManager(ATDHexGridManager* InGridManager);
+
+    /**
+     * 根据邻居高度差重建侧面裙边 Mesh。
+     * 遍历 6 条边，当本格高于邻格（或边缘无邻居）时生成梯形侧面。
+     * 无高度差时清除侧面 Mesh。
+     */
+    UFUNCTION(BlueprintCallable, Category = "HexTile|Visual")
+    void RebuildSideSkirt();
 
     // ---------------------------------------------------------------
     // 地形属性访问
@@ -185,6 +204,24 @@ protected:
     TMap<ETDTerrainType, TSoftObjectPtr<UMaterialInterface>> TerrainMaterials;
 
     // ---------------------------------------------------------------
+    // 侧面裙边（Side Skirt）
+    // ---------------------------------------------------------------
+
+    /**
+     * 侧面裙边 ProceduralMesh 组件。
+     * 在首次需要时延迟创建，用于渲染相邻高度差产生的侧面墙壁。
+     */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HexTile|Visual")
+    UProceduralMeshComponent* SideSkirtMesh = nullptr;
+
+    /** 所属 GridManager 弱引用，用于查询邻居 Tile 高度。 */
+    UPROPERTY()
+    TWeakObjectPtr<ATDHexGridManager> OwnerGridManager;
+
+    /** 缓存的六边形外接圆半径（世界单位）。 */
+    float CachedHexSize = 100.0f;
+
+    // ---------------------------------------------------------------
     // 内部视觉更新
     // ---------------------------------------------------------------
 
@@ -203,4 +240,32 @@ protected:
      * 作为无材质实例配置时的回退方案，以纯色区分地形。
      */
     static FLinearColor GetTerrainBaseColor(ETDTerrainType Type);
+
+private:
+    // ---------------------------------------------------------------
+    // 侧面裙边辅助
+    // ---------------------------------------------------------------
+
+    /**
+     * 获取平顶六边形第 Index 个顶点的本地 XY 坐标。
+     * Index 范围 [0, 5]，角度 = 60 * Index 度。
+     */
+    static FVector2D GetHexVertex(int32 Index, float InHexSize);
+
+    /**
+     * 获取方向 DirIndex 对应的边的两个顶点索引。
+     * 返回 (StartVertexIndex, EndVertexIndex)。
+     *
+     * 方向-顶点对应关系（平顶六边形）：
+     * Dir 0 (E):  V5 - V0
+     * Dir 1 (NE): V0 - V1
+     * Dir 2 (NW): V1 - V2
+     * Dir 3 (W):  V2 - V3
+     * Dir 4 (SW): V3 - V4
+     * Dir 5 (SE): V4 - V5
+     */
+    static TPair<int32, int32> GetEdgeVertexIndices(int32 DirIndex);
+
+    /** 确保 SideSkirtMesh 组件已创建。 */
+    void EnsureSideSkirtMesh();
 };

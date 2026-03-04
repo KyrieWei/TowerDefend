@@ -147,6 +147,33 @@ TArray<ATDHexTile*> ATDHexGridManager::GetAllTiles() const
 }
 
 // ===================================================================
+// 地图中心
+// ===================================================================
+
+FVector ATDHexGridManager::GetGridCenterWorld() const
+{
+    FTDHexCoord CenterCoord;
+
+    if (bRectangularLayout && MapColumns > 0 && MapRows > 0)
+    {
+        // 矩形布局：中心在 offset 坐标 (Columns/2, Rows/2)
+        const int32 CenterCol = MapColumns / 2;
+        const int32 CenterRow = MapRows / 2;
+        // even-q offset → cube（与 GenerateRectCoords 一致）
+        const int32 Q = CenterCol;
+        const int32 R = CenterRow - CenterCol / 2;
+        CenterCoord = FTDHexCoord(Q, R);
+    }
+    else
+    {
+        // 六边形布局：原点就是中心
+        CenterCoord = FTDHexCoord(0, 0);
+    }
+
+    return CenterCoord.ToWorldPosition(HexSize) + GetActorLocation();
+}
+
+// ===================================================================
 // 存档接口
 // ===================================================================
 
@@ -248,10 +275,54 @@ void ATDHexGridManager::SpawnTilesFromData(const FTDHexGridSaveData& Data)
         }
 
         NewTile->InitFromSaveData(TileData, HexSize);
+        NewTile->SetGridManager(this);
 
         TileMap.Add(TileData.Coord, NewTile);
     }
+
+    // 所有 Tile 就位后统一重建侧面裙边
+    RebuildAllSideSkirts();
 }
+
+// ===================================================================
+// 侧面裙边管理
+// ===================================================================
+
+void ATDHexGridManager::RebuildAllSideSkirts()
+{
+    for (auto& Pair : TileMap)
+    {
+        if (IsValid(Pair.Value))
+        {
+            Pair.Value->RebuildSideSkirt();
+        }
+    }
+}
+
+void ATDHexGridManager::NotifyTileHeightChanged(const FTDHexCoord& Coord)
+{
+    // 重建本格的侧面
+    ATDHexTile* Tile = GetTileAt(Coord);
+    if (Tile)
+    {
+        Tile->RebuildSideSkirt();
+    }
+
+    // 重建 6 个邻居的侧面（邻居的侧面可能因本格高度变化而需要更新）
+    TArray<FTDHexCoord> Neighbors = Coord.GetAllNeighbors();
+    for (const FTDHexCoord& NeighborCoord : Neighbors)
+    {
+        ATDHexTile* NeighborTile = GetTileAt(NeighborCoord);
+        if (NeighborTile)
+        {
+            NeighborTile->RebuildSideSkirt();
+        }
+    }
+}
+
+// ===================================================================
+// 内部方法
+// ===================================================================
 
 void ATDHexGridManager::EnsureTerrainGenerator()
 {

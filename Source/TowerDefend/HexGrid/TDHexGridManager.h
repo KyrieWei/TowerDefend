@@ -144,6 +144,32 @@ public:
     UFUNCTION(BlueprintPure, Category = "HexGrid")
     float GetHexSize() const { return HexSize; }
 
+    /**
+     * 获取地图几何中心的世界坐标。
+     * 矩形布局取 offset 坐标中点，六边形布局取原点。
+     */
+    UFUNCTION(BlueprintPure, Category = "HexGrid")
+    FVector GetGridCenterWorld() const;
+
+    // ---------------------------------------------------------------
+    // 侧面裙边管理
+    // ---------------------------------------------------------------
+
+    /**
+     * 对所有 Tile 重建侧面裙边 Mesh。
+     * 在整体生成完成后调用一次。
+     */
+    UFUNCTION(BlueprintCallable, Category = "HexGrid")
+    void RebuildAllSideSkirts();
+
+    /**
+     * 通知某 Tile 高度已变化，触发该 Tile 及其 6 个邻居的侧面重建。
+     *
+     * @param Coord  高度变化的 Tile 坐标。
+     */
+    UFUNCTION(BlueprintCallable, Category = "HexGrid")
+    void NotifyTileHeightChanged(const FTDHexCoord& Coord);
+
     // ---------------------------------------------------------------
     // 存档接口
     // ---------------------------------------------------------------

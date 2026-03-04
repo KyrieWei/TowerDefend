@@ -67,4 +67,50 @@ public:
      */
     UFUNCTION(BlueprintPure, Category = "MapFile")
     static FString GetSavedMapsDirectory();
+
+    // ---------------------------------------------------------------
+    //  默认序列化路径 & 文件轮转
+    // ---------------------------------------------------------------
+
+    /** 默认序列化文件名（不含扩展名） */
+    static const FString DefaultSerializationMapName;
+
+    /**
+     * 获取默认序列化地图目录。
+     * 路径: Content/TowerDefend/SerializationMaps/
+     */
+    UFUNCTION(BlueprintPure, Category = "MapFile")
+    static FString GetDefaultSerializationDirectory();
+
+    /**
+     * 获取默认序列化地图文件路径。
+     * 路径: Content/TowerDefend/SerializationMaps/SerializationMaps.json
+     */
+    UFUNCTION(BlueprintPure, Category = "MapFile")
+    static FString GetDefaultSerializationFilePath();
+
+    /**
+     * 保存到默认序列化路径，并自动轮转历史文件。
+     * 保留最近 MaxHistory 个备份 (SerializationMaps_01 ~ SerializationMaps_09)。
+     *
+     * @param Grid        网格管理器。
+     * @param MaxHistory  最大保留历史数量（含当前文件共 MaxHistory 个）。默认 10。
+     * @return            是否保存成功。
+     */
+    static bool SaveMapToDefaultPath(ATDHexGridManager* Grid, int32 MaxHistory = 10);
+
+    /**
+     * 从默认序列化路径加载最新的地图文件。
+     *
+     * @param Grid  网格管理器。
+     * @return      是否加载成功。
+     */
+    static bool LoadMapFromDefaultPath(ATDHexGridManager* Grid);
+
+private:
+    /**
+     * 轮转历史文件。将当前文件依次重命名为 _01 ~ _N，
+     * 超出 MaxHistory 的旧文件将被删除。
+     */
+    static void RotateHistoryFiles(const FString& Directory, const FString& BaseName, int32 MaxHistory);
 };

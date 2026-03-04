@@ -16,6 +16,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTDCamera, Log, All);
 
@@ -81,6 +82,18 @@ void ATDPlayerController::BeginPlay()
             ArmRotation.Pitch = CameraPitchAngle;
             Arm->SetRelativeRotation(ArmRotation);
         }
+    }
+
+    // 将相机初始位置聚焦到地图中心
+    if (ATDHexGridManager* GridManager = Cast<ATDHexGridManager>(
+            UGameplayStatics::GetActorOfClass(GetWorld(), ATDHexGridManager::StaticClass())))
+    {
+        const FVector MapCenter = GridManager->GetGridCenterWorld();
+        FocusOnPosition(MapCenter);
+
+        UE_LOG(LogTDCamera, Log,
+            TEXT("ATDPlayerController::BeginPlay: Camera focused on map center (%s)."),
+            *MapCenter.ToString());
     }
 }
 

@@ -12,6 +12,7 @@ class ATDGameState;
 class ATDGameMode;
 class ATDPlayerState;
 class ATDPlayerController;
+class ATDHexGridManager;
 
 /**
  * TD 蓝图工具库
@@ -176,4 +177,78 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TD|Match",
 		meta = (WorldContext = "WorldContextObject"))
 	static int32 GetTotalPlayerCount(const UObject* WorldContextObject);
+
+	// ═══════════════════════════════════════════════════════
+	//  地图管理
+	// ═══════════════════════════════════════════════════════
+
+	/** 获取场景中的 HexGridManager */
+	UFUNCTION(BlueprintPure, Category = "TD|Map",
+		meta = (WorldContext = "WorldContextObject"))
+	static ATDHexGridManager* GetHexGridManager(const UObject* WorldContextObject);
+
+	/**
+	 * 保存当前地图到 JSON 文件。
+	 *
+	 * 当 MapName 非空时，保存到 Content/SavedMaps/{MapName}.json。
+	 * 当 MapName 为空时，保存到默认路径 Content/TowerDefend/SerializationMaps/SerializationMaps.json，
+	 * 并自动轮转保留最近 10 个历史文件以便回退。
+	 *
+	 * @param WorldContextObject  世界上下文。
+	 * @param MapName             地图文件名（不含扩展名），为空则使用默认路径。
+	 * @return                    是否保存成功。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TD|Map",
+		meta = (WorldContext = "WorldContextObject"))
+	static bool SaveMapToFile(const UObject* WorldContextObject, const FString& MapName);
+
+	/**
+	 * 从 JSON 文件加载地图。
+	 *
+	 * 当 MapName 非空时，从 Content/SavedMaps/{MapName}.json 加载。
+	 * 当 MapName 为空时，从默认路径 Content/TowerDefend/SerializationMaps/SerializationMaps.json 加载。
+	 *
+	 * @param WorldContextObject  世界上下文。
+	 * @param MapName             地图文件名（不含扩展名），为空则使用默认路径。
+	 * @return                    是否加载成功。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TD|Map",
+		meta = (WorldContext = "WorldContextObject"))
+	static bool LoadMapFromFile(const UObject* WorldContextObject, const FString& MapName);
+
+	/** 获取所有可用的地图名称列表 */
+	UFUNCTION(BlueprintPure, Category = "TD|Map")
+	static TArray<FString> GetAvailableMapNames();
+
+	/**
+	 * 保存当前地图到 UE 存档槽位。
+	 *
+	 * @param WorldContextObject  世界上下文。
+	 * @param SlotName            存档槽位名称。
+	 * @return                    是否保存成功。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TD|Map",
+		meta = (WorldContext = "WorldContextObject"))
+	static bool SaveMapToSlot(const UObject* WorldContextObject, const FString& SlotName);
+
+	/**
+	 * 从 UE 存档槽位加载地图。
+	 *
+	 * @param WorldContextObject  世界上下文。
+	 * @param SlotName            存档槽位名称。
+	 * @return                    是否加载成功。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TD|Map",
+		meta = (WorldContext = "WorldContextObject"))
+	static bool LoadMapFromSlot(const UObject* WorldContextObject, const FString& SlotName);
+
+	/**
+	 * 重新生成随机地图。
+	 *
+	 * @param WorldContextObject  世界上下文。
+	 * @param Radius              地图半径（0 使用默认值）。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TD|Map",
+		meta = (WorldContext = "WorldContextObject"))
+	static void RegenerateMap(const UObject* WorldContextObject, int32 Radius = 0);
 };

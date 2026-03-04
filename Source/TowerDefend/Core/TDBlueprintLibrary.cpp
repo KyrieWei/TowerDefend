@@ -6,6 +6,9 @@
 #include "Core/TDGameMode.h"
 #include "Core/TDPlayerState.h"
 #include "Core/TDPlayerController.h"
+#include "Core/TDMapFileManager.h"
+#include "HexGrid/TDHexGridManager.h"
+#include "HexGrid/TDHexGridSaveData.h"
 
 #include "Engine/World.h"
 #include "GameFramework/GameStateBase.h"
@@ -225,4 +228,96 @@ int32 UTDBlueprintLibrary::GetTotalPlayerCount(const UObject* WorldContextObject
 {
 	const ATDGameState* GS = GetTDGameState(WorldContextObject);
 	return GS ? GS->PlayerArray.Num() : 0;
+}
+
+// ═══════════════════════════════════════════════════════
+//  地图管理
+// ═══════════════════════════════════════════════════════
+
+ATDHexGridManager* UTDBlueprintLibrary::GetHexGridManager(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+	if (!World) return nullptr;
+	return Cast<ATDHexGridManager>(
+		UGameplayStatics::GetActorOfClass(World, ATDHexGridManager::StaticClass()));
+}
+
+bool UTDBlueprintLibrary::SaveMapToFile(const UObject* WorldContextObject, const FString& MapName)
+{
+	ATDHexGridManager* Grid = GetHexGridManager(WorldContextObject);
+	if (!Grid)
+	{
+		return false;
+	}
+
+	// MapName 为空时使用默认序列化路径，并自动轮转保留最近 10 个历史文件
+	if (MapName.IsEmpty())
+	{
+		return UTDMapFileManager::SaveMapToDefaultPath(Grid, 10);
+	}
+
+	return UTDMapFileManager::SaveMapToFile(Grid, MapName);
+}
+
+bool UTDBlueprintLibrary::LoadMapFromFile(const UObject* WorldContextObject, const FString& MapName)
+{
+	ATDHexGridManager* Grid = GetHexGridManager(WorldContextObject);
+	if (!Grid)
+	{
+		return false;
+	}
+
+	// MapName 为空时从默认序列化路径加载
+	if (MapName.IsEmpty())
+	{
+		return UTDMapFileManager::LoadMapFromDefaultPath(Grid);
+	}
+
+	return UTDMapFileManager::LoadMapFromFile(Grid, MapName);
+}
+
+TArray<FString> UTDBlueprintLibrary::GetAvailableMapNames()
+{
+	return UTDMapFileManager::GetAvailableMapNames();
+}
+
+bool UTDBlueprintLibrary::SaveMapToSlot(const UObject* WorldContextObject, const FString& SlotName)
+{
+	ATDHexGridManager* Grid = GetHexGridManager(WorldContextObject);
+	if (!Grid)
+	{
+		return false;
+	}
+
+	UTDHexGridSaveGame* SaveGame = NewObject<UTDHexGridSaveGame>();
+	SaveGame->GridData = Grid->ExportSaveData();
+	return SaveGame->SaveToSlot(SlotName);
+}
+
+bool UTDBlueprintLibrary::LoadMapFromSlot(const UObject* WorldContextObject, const FString& SlotName)
+{
+	ATDHexGridManager* Grid = GetHexGridManager(WorldContextObject);
+	if (!Grid)
+	{
+		return false;
+	}
+
+	UTDHexGridSaveGame* SaveGame = NewObject<UTDHexGridSaveGame>();
+	if (!SaveGame->LoadFromSlot(SlotName))
+	{
+		return false;
+	}
+
+	Grid->ApplySaveData(SaveGame->GridData);
+	return true;
+}
+
+void UTDBlueprintLibrary::RegenerateMap(const UObject* WorldContextObject, int32 Radius)
+{
+	ATDHexGridManager* Grid = GetHexGridManager(WorldContextObject);
+	if (Grid)
+	{
+		Grid->GenerateGrid(Radius);
+	}
 }

@@ -18,6 +18,17 @@ local TerrainTypeNames = {
     "DeepWater",
 }
 
+-- Terrain type name -> ETDTerrainType enum value mapping
+local TerrainTypeEnumMap = {
+    Plain     = UE.ETDTerrainType.Plain,
+    Hill      = UE.ETDTerrainType.Hill,
+    Mountain  = UE.ETDTerrainType.Mountain,
+    Forest    = UE.ETDTerrainType.Forest,
+    River     = UE.ETDTerrainType.River,
+    Swamp     = UE.ETDTerrainType.Swamp,
+    DeepWater = UE.ETDTerrainType.DeepWater,
+}
+
 -- ---------------------------------------------------------------
 -- Lifecycle
 -- ---------------------------------------------------------------
@@ -196,10 +207,27 @@ function WBP_MapEditor:OnHeightLevelChanged(NewHeight)
 end
 
 -- Called when the terrain type changes via combo box interaction.
--- Override or hook into this for external logic.
+-- Updates the TerrainEditorComponent's ActiveTerrainType on the PlayerController,
+-- and enables apply-on-click so that clicking a tile paints this type.
 ---@param NewType string  The new terrain type display name
 function WBP_MapEditor:OnTerrainTypeSelectionChanged(NewType)
-    -- Override point for subclasses or external logic
+    local EnumValue = TerrainTypeEnumMap[NewType]
+    if EnumValue == nil then
+        return
+    end
+
+    local PlayerController = UE.UGameplayStatics.GetPlayerController(self, 0)
+    if not PlayerController then
+        return
+    end
+
+    local EditorComp = PlayerController.TerrainEditorComponent
+    if not EditorComp then
+        return
+    end
+
+    EditorComp:SetActiveTerrainType(EnumValue)
+    EditorComp:SetApplyTerrainTypeOnClick(true)
 end
 
 return WBP_MapEditor

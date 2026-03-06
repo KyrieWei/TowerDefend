@@ -11,6 +11,7 @@
 #include "Unit/TDUnitDataAsset.h"
 #include "HexGrid/TDHexCoord.h"
 #include "HexGrid/TDHexGridManager.h"
+#include "HexGrid/TDHexTile.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -161,12 +162,36 @@ void ATDPlayerController::SetupInputComponent()
             this, &ATDPlayerController::HandleFastMoveCompleted);
     }
 
-    // 左键点击 — 地形编辑器笔刷绘制
+    // 左键点击 — 地形编辑器地块选中
     if (IA_LeftClick)
     {
         EnhancedInput->BindAction(
             IA_LeftClick, ETriggerEvent::Started,
             this, &ATDPlayerController::HandleLeftClick);
+    }
+
+    // 右键点击 — 地形编辑器取消选中
+    if (IA_RightClick)
+    {
+        EnhancedInput->BindAction(
+            IA_RightClick, ETriggerEvent::Started,
+            this, &ATDPlayerController::HandleRightClick);
+    }
+
+    // 升高地形
+    if (IA_RaiseTerrain)
+    {
+        EnhancedInput->BindAction(
+            IA_RaiseTerrain, ETriggerEvent::Started,
+            this, &ATDPlayerController::HandleRaiseTerrain);
+    }
+
+    // 降低地形
+    if (IA_LowerTerrain)
+    {
+        EnhancedInput->BindAction(
+            IA_LowerTerrain, ETriggerEvent::Started,
+            this, &ATDPlayerController::HandleLowerTerrain);
     }
 }
 
@@ -356,7 +381,77 @@ void ATDPlayerController::HandleLeftClick(const FInputActionValue& Value)
 {
     if (TerrainEditorComponent && TerrainEditorComponent->IsInEditMode())
     {
-        TerrainEditorComponent->PaintTileUnderCursor();
+        TerrainEditorComponent->SelectTileUnderCursor();
+    }
+}
+
+void ATDPlayerController::HandleRightClick(const FInputActionValue& Value)
+{
+    if (TerrainEditorComponent && TerrainEditorComponent->IsInEditMode())
+    {
+        TerrainEditorComponent->DeselectTile();
+    }
+}
+
+void ATDPlayerController::HandleRaiseTerrain(const FInputActionValue& Value)
+{
+    if (!TerrainEditorComponent || !TerrainEditorComponent->IsInEditMode())
+    {
+        return;
+    }
+
+    if (!TerrainEditorComponent->HasSelectedTile())
+    {
+        return;
+    }
+
+    const bool bSuccess = TerrainEditorComponent->RaiseSelectedTile();
+
+    if (GEngine)
+    {
+        if (bSuccess)
+        {
+            ATDHexTile* Tile = TerrainEditorComponent->GetSelectedTile();
+            const int32 NewHeight = Tile ? Tile->GetHeightLevel() : 0;
+            GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green,
+                FString::Printf(TEXT("Terrain raised to height %d"), NewHeight));
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,
+                TEXT("Cannot raise terrain further"));
+        }
+    }
+}
+
+void ATDPlayerController::HandleLowerTerrain(const FInputActionValue& Value)
+{
+    if (!TerrainEditorComponent || !TerrainEditorComponent->IsInEditMode())
+    {
+        return;
+    }
+
+    if (!TerrainEditorComponent->HasSelectedTile())
+    {
+        return;
+    }
+
+    const bool bSuccess = TerrainEditorComponent->LowerSelectedTile();
+
+    if (GEngine)
+    {
+        if (bSuccess)
+        {
+            ATDHexTile* Tile = TerrainEditorComponent->GetSelectedTile();
+            const int32 NewHeight = Tile ? Tile->GetHeightLevel() : 0;
+            GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green,
+                FString::Printf(TEXT("Terrain lowered to height %d"), NewHeight));
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red,
+                TEXT("Cannot lower terrain further"));
+        }
     }
 }
 
@@ -534,6 +629,171 @@ void ATDPlayerController::TerrainBrush(const FString& TypeName)
     {
         GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Cyan,
             FString::Printf(TEXT("Terrain Brush: %s"), *TypeName));
+    }
+}
+
+void ATDPlayerController::TerrainHeight(const FString& Direction)
+{
+    if (!TerrainEditorComponent)
+    {
+        UE_LOG(LogTDCamera, Error,
+            TEXT("TerrainHeight: TerrainEditorComponent is null."));
+        return;
+    }
+
+    if (!TerrainEditorComponent->IsInEditMode())
+    {
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("TerrainHeight: Not in edit mode. Use TerrainEditMode first."));
+        }
+        return;
+    }
+
+    if (!TerrainEditorComponent->HasSelectedTile())
+    {
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("TerrainHeight: No tile selected. Click a tile first."));
+        }
+        return;
+    }
+
+    bool bSuccess = false;
+
+    if (Direction.Equals(TEXT("raise"), ESearchCase::IgnoreCase)
+        || Direction.Equals(TEXT("up"), ESearchCase::IgnoreCase))
+    {
+        bSuccess = TerrainEditorComponent->RaiseSelectedTile();
+    }
+    else if (Direction.Equals(TEXT("lower"), ESearchCase::IgnoreCase)
+        || Direction.Equals(TEXT("down"), ESearchCase::IgnoreCase))
+    {
+        bSuccess = TerrainEditorComponent->LowerSelectedTile();
+    }
+    else
+    {
+        UE_LOG(LogTDCamera, Warning,
+            TEXT("TerrainHeight: Unknown direction '%s'. Valid: raise/up, lower/down"),
+            *Direction);
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                FString::Printf(
+                    TEXT("Unknown direction: %s (use raise/up or lower/down)"),
+                    *Direction));
+        }
+        return;
+    }
+
+    if (GEngine)
+    {
+        if (bSuccess)
+        {
+            ATDHexTile* Tile = TerrainEditorComponent->GetSelectedTile();
+            const int32 Height = Tile ? Tile->GetHeightLevel() : 0;
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
+                FString::Printf(TEXT("Terrain height: %d"), Height));
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("Cannot modify terrain height (validation failed)."));
+        }
+    }
+}
+
+void ATDPlayerController::TerrainSet(const FString& TypeName)
+{
+    if (!TerrainEditorComponent)
+    {
+        UE_LOG(LogTDCamera, Error,
+            TEXT("TerrainSet: TerrainEditorComponent is null."));
+        return;
+    }
+
+    if (!TerrainEditorComponent->IsInEditMode())
+    {
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("TerrainSet: Not in edit mode. Use TerrainEditMode first."));
+        }
+        return;
+    }
+
+    if (!TerrainEditorComponent->HasSelectedTile())
+    {
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                TEXT("TerrainSet: No tile selected. Click a tile first."));
+        }
+        return;
+    }
+
+    // 字符串 → 枚举解析
+    ETDTerrainType NewType = ETDTerrainType::Plain;
+
+    if (TypeName.Equals(TEXT("Plain"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Plain;
+    }
+    else if (TypeName.Equals(TEXT("Hill"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Hill;
+    }
+    else if (TypeName.Equals(TEXT("Mountain"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Mountain;
+    }
+    else if (TypeName.Equals(TEXT("Forest"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Forest;
+    }
+    else if (TypeName.Equals(TEXT("River"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::River;
+    }
+    else if (TypeName.Equals(TEXT("Swamp"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::Swamp;
+    }
+    else if (TypeName.Equals(TEXT("DeepWater"), ESearchCase::IgnoreCase))
+    {
+        NewType = ETDTerrainType::DeepWater;
+    }
+    else
+    {
+        UE_LOG(LogTDCamera, Warning,
+            TEXT("TerrainSet: Unknown type '%s'. "
+                 "Valid: Plain, Hill, Mountain, Forest, River, Swamp, DeepWater"),
+            *TypeName);
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                FString::Printf(TEXT("Unknown terrain type: %s"), *TypeName));
+        }
+        return;
+    }
+
+    const bool bSuccess =
+        TerrainEditorComponent->SetSelectedTileTerrainType(NewType);
+
+    if (GEngine)
+    {
+        if (bSuccess)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
+                FString::Printf(TEXT("Terrain set to: %s"), *TypeName));
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                FString::Printf(TEXT("Failed to set terrain to: %s"), *TypeName));
+        }
     }
 }
 

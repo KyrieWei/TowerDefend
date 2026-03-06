@@ -208,9 +208,21 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
     TObjectPtr<UInputAction> IA_CameraFastMove;
 
-    /** 左键点击输入动作 (Bool)。用于地形编辑器笔刷绘制。 */
+    /** 左键点击输入动作 (Bool)。用于地形编辑器地块选中。 */
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
     TObjectPtr<UInputAction> IA_LeftClick;
+
+    /** 右键点击输入动作 (Bool)。用于地形编辑器取消选中。 */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
+    TObjectPtr<UInputAction> IA_RightClick;
+
+    /** 升高地形输入动作 (Bool)。编辑模式下升高选中地块。 */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
+    TObjectPtr<UInputAction> IA_RaiseTerrain;
+
+    /** 降低地形输入动作 (Bool)。编辑模式下降低选中地块。 */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Input")
+    TObjectPtr<UInputAction> IA_LowerTerrain;
 
     // ---------------------------------------------------------------
     // 地形编辑器
@@ -242,8 +254,17 @@ private:
     /** Shift 加速结束回调。 */
     void HandleFastMoveCompleted(const FInputActionValue& Value);
 
-    /** 左键点击回调，编辑模式下执行笔刷绘制。 */
+    /** 左键点击回调，编辑模式下选中地块。 */
     void HandleLeftClick(const FInputActionValue& Value);
+
+    /** 右键点击回调，编辑模式下取消选中。 */
+    void HandleRightClick(const FInputActionValue& Value);
+
+    /** 升高地形回调，编辑模式下升高选中地块高度。 */
+    void HandleRaiseTerrain(const FInputActionValue& Value);
+
+    /** 降低地形回调，编辑模式下降低选中地块高度。 */
+    void HandleLowerTerrain(const FInputActionValue& Value);
 
     // ---------------------------------------------------------------
     // 控制台命令 (Exec)
@@ -256,6 +277,14 @@ private:
     /** 设置地形笔刷类型。用法: TerrainBrush <TypeName> */
     UFUNCTION(Exec)
     void TerrainBrush(const FString& TypeName);
+
+    /** 修改选中地块高度。用法: TerrainHeight <raise|lower> */
+    UFUNCTION(Exec)
+    void TerrainHeight(const FString& Direction);
+
+    /** 设置选中地块地形类型。用法: TerrainSet <TypeName> */
+    UFUNCTION(Exec)
+    void TerrainSet(const FString& TypeName);
 
     /** 保存当前地图到文件。用法: SaveMap <MapName> */
     UFUNCTION(Exec)

@@ -3,6 +3,9 @@
 -- Provides height level slider and terrain type combo box controls
 -- for the hex grid map editor.
 
+local TDCoreAccessor = require("UI.Helper.TDCoreAccessor")
+local TDMapAccessor = require("UI.Helper.TDMapAccessor")
+
 ---@type WBP_MapEditor
 local WBP_MapEditor = UnLua.Class()
 
@@ -36,8 +39,8 @@ local TerrainTypeEnumMap = {
 -- Called by UE when the widget is added to viewport
 function WBP_MapEditor:Construct()
     -- Height range constants (ATDHexTile::MinHeightLevel / MaxHeightLevel)
-    self.MinHeight = -2
-    self.MaxHeight = 3
+    self.MinHeight = 1
+    self.MaxHeight = 5
 
     -- Current state
     self.SelectedHeightLevel = 0
@@ -106,6 +109,18 @@ function WBP_MapEditor:BindEvents()
     if self.TerrainType then
         self.TerrainType.OnSelectionChanged:Add(self, self.OnTerrainTypeChanged)
     end
+
+    if self.CloseBtn then
+        self.CloseBtn.OnClicked:Add(self, self.OnCloseBtnClicked)
+    end
+
+    if self.SaveMap then
+        self.SaveMap.OnClicked:Add(self, self.OnSaveMapClicked)
+    end
+
+    if self.LoadMap then
+        self.LoadMap.OnClicked:Add(self, self.OnLoadMapClicked)
+    end
 end
 
 -- Unbind widget event callbacks
@@ -116,6 +131,18 @@ function WBP_MapEditor:UnbindEvents()
 
     if self.TerrainType then
         self.TerrainType.OnSelectionChanged:Remove(self, self.OnTerrainTypeChanged)
+    end
+
+    if self.CloseBtn then
+        self.CloseBtn.OnClicked:Remove(self, self.OnCloseBtnClicked)
+    end
+
+    if self.SaveMap then
+        self.SaveMap.OnClicked:Remove(self, self.OnSaveMapClicked)
+    end
+
+    if self.LoadMap then
+        self.LoadMap.OnClicked:Remove(self, self.OnLoadMapClicked)
     end
 end
 
@@ -132,10 +159,29 @@ function WBP_MapEditor:OnHeightSliderChanged(Value)
     -- Clamp to valid range
     HeightLevel = math.max(self.MinHeight, math.min(self.MaxHeight, HeightLevel))
 
+    -- Snap slider to nearest integer so it cannot rest on fractional values
+    if self.HeightSlider and Value ~= HeightLevel then
+        self.HeightSlider:SetValue(HeightLevel)
+    end
+
     if HeightLevel ~= self.SelectedHeightLevel then
         self.SelectedHeightLevel = HeightLevel
         self:OnHeightLevelChanged(HeightLevel)
     end
+end
+
+-- Called when CloseBtn is clicked.
+-- Exits terrain edit mode and removes this widget from viewport.
+function WBP_MapEditor:OnCloseBtnClicked()
+    local PlayerController = TDCoreAccessor.GetLocalPlayerController(self)
+    if PlayerController then
+        local EditorComp = PlayerController.TerrainEditorComponent
+        if EditorComp and EditorComp:IsInEditMode() then
+            EditorComp:ExitEditMode()
+        end
+    end
+
+    self:RemoveFromParent()
 end
 
 -- Called when the terrain type combo box selection changes.
@@ -200,10 +246,34 @@ end
 -- ---------------------------------------------------------------
 
 -- Called when the height level changes via slider interaction.
--- Override or hook into this for external logic.
+-- Updates the TerrainEditorComponent's ActiveHeightLevel on the PlayerController,
+-- and enables apply-on-click so that clicking a tile sets this height.
 ---@param NewHeight integer  The new height level
 function WBP_MapEditor:OnHeightLevelChanged(NewHeight)
-    -- Override point for subclasses or external logic
+    local PlayerController = TDCoreAccessor.GetLocalPlayerController(self)
+    if not PlayerController then
+        return
+    end
+
+    local EditorComp = PlayerController.TerrainEditorComponent
+    if not EditorComp then
+        return
+    end
+
+    EditorComp:SetActiveHeightLevel(NewHeight)
+    EditorComp:SetApplyHeightOnClick(true)
+end
+
+-- Called when the SaveMap button is clicked.
+-- Saves the current map to a JSON file using TDMapAccessor.
+function WBP_MapEditor:OnSaveMapClicked()
+    TDMapAccessor.SaveMapToFile(self, "")
+end
+
+-- Called when the LoadMap button is clicked.
+-- Loads a map from a JSON file using TDMapAccessor.
+function WBP_MapEditor:OnLoadMapClicked()
+    TDMapAccessor.LoadMapFromFile(self, "")
 end
 
 -- Called when the terrain type changes via combo box interaction.
@@ -216,7 +286,7 @@ function WBP_MapEditor:OnTerrainTypeSelectionChanged(NewType)
         return
     end
 
-    local PlayerController = UE.UGameplayStatics.GetPlayerController(self, 0)
+    local PlayerController = TDCoreAccessor.GetLocalPlayerController(self)
     if not PlayerController then
         return
     end

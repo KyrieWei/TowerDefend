@@ -11,9 +11,10 @@
  * UTDTerrainGenerator - 程序化地形生成器。
  *
  * 纯数据逻辑组件，不涉及渲染。
- * 使用 Perlin/Simplex Noise 生成高度场和湿度场，
- * 基于高度+湿度决定地形类型，
- * 支持对称地图生成（PVP 公平性）和后处理约束（连通性、基地平坦化）。
+ * 使用距离驱动分层算法生成地形：中心平原、边缘深海、海岸过渡带，
+ * 内陆区通过 Noise + 随机散布山地/丘陵/森林，
+ * 沼泽/河流以 2-3 格连通集群形式放置。
+ * 支持对称地图生成（PVP 公平性）和后处理约束（基地平坦化、高度平滑）。
  *
  * 输出 FTDHexGridSaveData，供 TDHexGridManager 消费。
  */
@@ -77,6 +78,50 @@ public:
     int32 BaseFlattenRadius = 2;
 
     // ---------------------------------------------------------------
+    // 距离驱动地形生成配置
+    // ---------------------------------------------------------------
+
+    /** 深海区域起始的归一化距离阈值（距中心比例 0-1）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "0.5", ClampMax = "1.0"))
+    float EdgeDeepWaterThreshold = 0.85f;
+
+    /** 海岸过渡带起始的归一化距离阈值。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "0.3", ClampMax = "1.0"))
+    float CoastalTransitionStart = 0.75f;
+
+    /** 内陆区山地（Mountain）的生成概率。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "0.0", ClampMax = "0.2"))
+    float MountainSpawnChance = 0.02f;
+
+    /** 内陆区丘陵（Hill）的生成概率。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "0.0", ClampMax = "0.3"))
+    float HillSpawnChance = 0.08f;
+
+    /** 内陆区森林（Forest）的生成概率。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "0.0", ClampMax = "0.3"))
+    float ForestSpawnChance = 0.10f;
+
+    /** 沼泽/河流连通集群的数量（对称化前）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "0", ClampMax = "20"))
+    int32 WetlandClusterCount = 6;
+
+    /** 沼泽/河流集群的最小格数。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "1", ClampMax = "5"))
+    int32 WetlandClusterMinSize = 2;
+
+    /** 沼泽/河流集群的最大格数。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TerrainGenerator|DistanceDriven",
+        meta = (ClampMin = "1", ClampMax = "6"))
+    int32 WetlandClusterMaxSize = 3;
+
+    // ---------------------------------------------------------------
     // 核心接口
     // ---------------------------------------------------------------
 
@@ -110,7 +155,7 @@ private:
     static float SampleNoise(float X, float Y, float Scale, float Offset);
 
     /**
-     * 将连续的 Noise 高度值映射为离散高度等级 [-2, 3]。
+     * 将连续的 Noise 高度值映射为离散高度等级 [1, 5]。
      *
      * @param NoiseValue  [-1, 1] 范围的 Noise 值。
      * @return            离散高度等级。
@@ -119,8 +164,9 @@ private:
 
     /**
      * 基于高度等级和湿度值决定地形类型。
+     * 仅保留用于后处理兼容，生成阶段已由距离驱动算法替代。
      *
-     * @param InHeightLevel    高度等级 [-2, 3]。
+     * @param InHeightLevel    高度等级 [1, 5]。
      * @param MoistureValue    [-1, 1] 范围的湿度值。
      * @return                 对应的地形类型。
      */
@@ -159,7 +205,7 @@ private:
     static void ApplyPointSymmetry(TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap);
 
     /**
-     * 将基地周围指定半径内的格子平坦化为平原 + 高度 0。
+     * 将基地周围指定半径内的格子平坦化为平原 + 高度 1。
      *
      * @param TileDataMap   坐标→格子数据的映射，将被原地修改。
      * @param BasePositions 所有基地坐标。
@@ -184,4 +230,140 @@ private:
      * @param TileData  需要更新的格子数据。
      */
     static void SyncTerrainTypeWithHeight(FTDHexTileSaveData& TileData);
+
+    // ---------------------------------------------------------------
+    // 距离驱动地形生成内部方法
+    // ---------------------------------------------------------------
+
+    /**
+     * 初始化坐标列表，计算地图中心和最大距离。
+     *
+     * @param OutAllCoords     输出所有坐标列表。
+     * @param OutCenter        输出地图中心坐标。
+     * @param OutMaxDistance    输出中心到最远坐标的距离。
+     */
+    void InitializeCoordinates(
+        TArray<FTDHexCoord>& OutAllCoords,
+        FTDHexCoord& OutCenter,
+        int32& OutMaxDistance) const;
+
+    /**
+     * 计算单格到中心的归一化距离 [0, 1]。
+     *
+     * @param Coord         目标坐标。
+     * @param Center        地图中心坐标。
+     * @param MaxDistance    中心到最远坐标的距离。
+     * @return              归一化距离，范围 [0, 1]。
+     */
+    static float ComputeNormalizedDistance(
+        const FTDHexCoord& Coord,
+        const FTDHexCoord& Center,
+        int32 MaxDistance);
+
+    /**
+     * 根据归一化距离分层分配基础地形：深海/河流/平原。
+     *
+     * @param AllCoords         所有坐标列表。
+     * @param Center            地图中心坐标。
+     * @param MaxDistance        最大距离。
+     * @param TileDataMap       输出的格子数据映射。
+     */
+    void AssignBaseLayerByDistance(
+        const TArray<FTDHexCoord>& AllCoords,
+        const FTDHexCoord& Center,
+        int32 MaxDistance,
+        TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap) const;
+
+    /**
+     * 在内陆平原区域散布山地、丘陵、森林地形。
+     * 使用 Noise + 随机 Roll 双重门控。
+     *
+     * @param TileDataMap   格子数据映射，将被原地修改。
+     * @param Center        地图中心坐标。
+     * @param MaxDistance    最大距离。
+     * @param RandStream    确定性随机流。
+     * @param SeedOffset    Noise 偏移量。
+     */
+    void ScatterTerrainFeatures(
+        TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+        const FTDHexCoord& Center,
+        int32 MaxDistance,
+        FRandomStream& RandStream,
+        float SeedOffset) const;
+
+    /**
+     * 放置多个沼泽/河流连通集群。
+     * 先放置河流集群，再放置沼泽集群（沼泽优先在河流旁）。
+     *
+     * @param TileDataMap   格子数据映射，将被原地修改。
+     * @param Center        地图中心坐标。
+     * @param MaxDistance    最大距离。
+     * @param RandStream    确定性随机流。
+     */
+    void PlaceWetlandClusters(
+        TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+        const FTDHexCoord& Center,
+        int32 MaxDistance,
+        FRandomStream& RandStream) const;
+
+    /**
+     * 放置指定类型的地形集群。
+     * 沼泽类型会优先选取河流相邻的候选格作为种子。
+     *
+     * @param TileDataMap       格子数据映射，将被原地修改。
+     * @param Candidates        候选种子坐标列表，将被原地修改。
+     * @param WetlandType       要放置的地形类型（River 或 Swamp）。
+     * @param ClusterCount      要放置的集群数量。
+     * @param RandStream        确定性随机流。
+     */
+    void PlaceTypedClusters(
+        TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+        TArray<FTDHexCoord>& Candidates,
+        ETDTerrainType WetlandType,
+        int32 ClusterCount,
+        FRandomStream& RandStream) const;
+
+    /**
+     * 从种子格向邻居扩展生成一个连通集群。
+     *
+     * @param SeedCoord     种子坐标。
+     * @param TargetSize    目标集群大小。
+     * @param TileDataMap   格子数据映射（用于检查邻居可用性）。
+     * @param RandStream    确定性随机流。
+     * @return              集群坐标列表（可能小于 TargetSize）。
+     */
+    static TArray<FTDHexCoord> GrowWetlandCluster(
+        const FTDHexCoord& SeedCoord,
+        int32 TargetSize,
+        const TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+        FRandomStream& RandStream);
+
+    /**
+     * 将集群坐标写入 TileDataMap，设置为指定的地形类型。
+     * 高度保持为 1（基准高度）。
+     *
+     * @param ClusterCoords 集群坐标列表。
+     * @param TileDataMap   格子数据映射，将被原地修改。
+     * @param WetlandType   要设置的地形类型（River 或 Swamp）。
+     */
+    static void ApplyWetlandCluster(
+        const TArray<FTDHexCoord>& ClusterCoords,
+        TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+        ETDTerrainType WetlandType);
+
+    /**
+     * 为湿地集群选取种子索引。
+     * 沼泽类型优先选取邻接河流的候选格。
+     *
+     * @param Candidates    候选种子坐标列表。
+     * @param TileDataMap   格子数据映射（用于查询邻居地形）。
+     * @param WetlandType   要放置的地形类型。
+     * @param RandStream    确定性随机流。
+     * @return              候选列表中的索引。
+     */
+    static int32 PickWetlandSeed(
+        const TArray<FTDHexCoord>& Candidates,
+        const TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+        ETDTerrainType WetlandType,
+        FRandomStream& RandStream);
 };

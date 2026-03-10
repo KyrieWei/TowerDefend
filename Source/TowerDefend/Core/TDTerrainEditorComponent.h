@@ -35,6 +35,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnTileHeightChanged, FTDHexCoord
 /** 当前编辑地形类型变化委托。 */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActiveTerrainTypeChanged, ETDTerrainType, OldType, ETDTerrainType, NewType);
 
+/** 当前编辑高度变化委托。 */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActiveHeightLevelChanged, int32, OldHeight, int32, NewHeight);
+
 /**
  * UTDTerrainEditorComponent - 运行时地形编辑器组件。
  *
@@ -172,6 +175,35 @@ public:
     bool IsApplyTerrainTypeOnClick() const { return bApplyTerrainTypeOnClick; }
 
     // ---------------------------------------------------------------
+    // 当前编辑高度（UI 可绑定）
+    // ---------------------------------------------------------------
+
+    /**
+     * 设置当前编辑高度值。
+     * UI 界面更改此值后，点击地块时自动将地块设置为该高度。
+     *
+     * @param NewHeight  新的高度值。
+     */
+    UFUNCTION(BlueprintCallable, Category = "TerrainEditor|ActiveHeight")
+    void SetActiveHeightLevel(int32 NewHeight);
+
+    /** 获取当前编辑高度值。 */
+    UFUNCTION(BlueprintPure, Category = "TerrainEditor|ActiveHeight")
+    int32 GetActiveHeightLevel() const { return ActiveHeightLevel; }
+
+    /**
+     * 设置是否在点击选中地块时自动应用当前编辑高度。
+     *
+     * @param bEnable  true 为启用，false 为禁用。
+     */
+    UFUNCTION(BlueprintCallable, Category = "TerrainEditor|ActiveHeight")
+    void SetApplyHeightOnClick(bool bEnable);
+
+    /** 查询是否在点击时自动应用高度。 */
+    UFUNCTION(BlueprintPure, Category = "TerrainEditor|ActiveHeight")
+    bool IsApplyHeightOnClick() const { return bApplyHeightOnClick; }
+
+    // ---------------------------------------------------------------
     // 笔刷（快速绘制模式）
     // ---------------------------------------------------------------
 
@@ -223,6 +255,10 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "TerrainEditor|Events")
     FOnActiveTerrainTypeChanged OnActiveTerrainTypeChanged;
 
+    /** 当前编辑高度变化时广播。 */
+    UPROPERTY(BlueprintAssignable, Category = "TerrainEditor|Events")
+    FOnActiveHeightLevelChanged OnActiveHeightLevelChanged;
+
 protected:
     virtual void BeginPlay() override;
 
@@ -246,6 +282,16 @@ private:
     UPROPERTY(BlueprintReadWrite, Category = "TerrainEditor|ActiveType",
         meta = (AllowPrivateAccess = "true"))
     bool bApplyTerrainTypeOnClick = false;
+
+    /** 当前编辑高度值，UI 可读写。点击地块时自动应用此高度。 */
+    UPROPERTY(BlueprintReadWrite, Category = "TerrainEditor|ActiveHeight",
+        meta = (AllowPrivateAccess = "true"))
+    int32 ActiveHeightLevel = 1;
+
+    /** 是否在点击选中地块时自动应用 ActiveHeightLevel。 */
+    UPROPERTY(BlueprintReadWrite, Category = "TerrainEditor|ActiveHeight",
+        meta = (AllowPrivateAccess = "true"))
+    bool bApplyHeightOnClick = false;
 
     // ---------------------------------------------------------------
     // 选中状态
@@ -303,4 +349,7 @@ private:
 
     /** 将当前 ActiveTerrainType 应用到选中地块。 */
     void ApplyActiveTerrainType();
+
+    /** 将当前 ActiveHeightLevel 应用到选中地块。 */
+    void ApplyActiveHeightLevel();
 };

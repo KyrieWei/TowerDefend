@@ -1,0 +1,2807 @@
+{
+	"MapRadius": 15,
+	"Seed": 274805962,
+	"Version": 1,
+	"Tiles": [
+		{
+			"Q": 0,
+			"R": 0,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 1,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 2,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 3,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 17,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 18,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 0,
+			"R": 19,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 0,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 1,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": 0
+		},
+		{
+			"Q": 1,
+			"R": 2,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 3,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 17,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 18,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 1,
+			"R": 19,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": -1,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 0,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 1,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 2,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 17,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 2,
+			"R": 18,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": -1,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 0,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 1,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 17,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 3,
+			"R": 18,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 4,
+			"R": 17,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 5,
+			"R": 17,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 5,
+			"TerrainType": "Plain",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 6,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 3,
+			"TerrainType": "Plain",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 7,
+			"TerrainType": "Plain",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 7,
+			"R": 16,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 3,
+			"TerrainType": "Plain",
+			"HeightLevel": -1,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 8,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 6,
+			"TerrainType": "Plain",
+			"HeightLevel": -1,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 9,
+			"R": 15,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 3,
+			"TerrainType": "Plain",
+			"HeightLevel": -1,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 4,
+			"TerrainType": "Plain",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 10,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 0,
+			"TerrainType": "Plain",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 7,
+			"TerrainType": "Plain",
+			"HeightLevel": -1,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 11,
+			"R": 14,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 12,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 13,
+			"R": 13,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 14,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 2,
+			"TerrainType": "Plain",
+			"HeightLevel": -1,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 10,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 11,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 15,
+			"R": 12,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 9,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 10,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 16,
+			"R": 11,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 8,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 9,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 10,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 17,
+			"R": 11,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 7,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 8,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 18,
+			"R": 9,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": 1
+		},
+		{
+			"Q": 18,
+			"R": 10,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -9,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -8,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -7,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": -1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 0,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 1,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 2,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 3,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 4,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 5,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 6,
+			"TerrainType": "DeepWater",
+			"HeightLevel": -2,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 7,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 8,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 9,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		},
+		{
+			"Q": 19,
+			"R": 10,
+			"TerrainType": "Plain",
+			"HeightLevel": 0,
+			"OwnerPlayerIndex": -1
+		}
+	]
+}

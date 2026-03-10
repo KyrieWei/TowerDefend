@@ -42,10 +42,10 @@ float UTDBuildingDataAsset::GetEffectiveAttackRange(int32 InHeightLevel) const
     // 基础范围
     float EffectiveRange = AttackRange;
 
-    // 高度 > 0 时才获得加成
-    if (InHeightLevel > 0)
+    // 高度大于基准（1）时获得射程加成
+    if (InHeightLevel > 1)
     {
-        EffectiveRange += HeightRangeBonus * static_cast<float>(InHeightLevel);
+        EffectiveRange += HeightRangeBonus * static_cast<float>(InHeightLevel - 1);
     }
 
     return EffectiveRange;

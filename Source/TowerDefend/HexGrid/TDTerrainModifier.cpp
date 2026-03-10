@@ -93,6 +93,15 @@ bool UTDTerrainModifier::ValidateModification(const ATDHexGridManager* Grid,
         return false;
     }
 
+    // 深水地块高度固定不可修改
+    if (Tile->GetTerrainType() == ETDTerrainType::DeepWater)
+    {
+        UE_LOG(LogTemp, Verbose,
+            TEXT("UTDTerrainModifier::ValidateModification: DeepWater tile at %s is immutable."),
+            *Coord.ToString());
+        return false;
+    }
+
     // 计算新高度
     const int32 CurrentHeight = Tile->GetHeightLevel();
     const int32 NewHeight = CurrentHeight + HeightDelta;
@@ -150,17 +159,6 @@ bool UTDTerrainModifier::ApplyHeightChange(ATDHexGridManager* Grid,
 
     const int32 NewHeight = Tile->GetHeightLevel() + HeightDelta;
     Tile->SetHeightLevel(NewHeight);
-
-    // 高度变化后可能需要更新地形类型
-    // 例如：升到 3 → 山地，降到 -2 → 深水
-    if (NewHeight >= ATDHexTile::MaxHeightLevel)
-    {
-        Tile->SetTerrainType(ETDTerrainType::Mountain);
-    }
-    else if (NewHeight <= ATDHexTile::MinHeightLevel)
-    {
-        Tile->SetTerrainType(ETDTerrainType::DeepWater);
-    }
 
     UE_LOG(LogTemp, Log,
         TEXT("UTDTerrainModifier: Height changed at %s by %d to %d."),

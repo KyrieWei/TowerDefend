@@ -13,7 +13,7 @@
  * 在战斗阶段通过定时器周期性搜索范围内的敌方单位并攻击。
  *
  * 攻击范围受所在格子高度影响：
- *   实际射程 = 基础射程 + HeightRangeBonus * max(HeightLevel, 0)
+ *   实际射程 = 基础射程 + HeightRangeBonus * max(HeightLevel - 1, 0)
  *
  * 当前 Unit 系统尚未完成，FindNearestTarget() 返回 nullptr，
  * 攻击框架已搭建完毕，待 Unit 模块对接后即可生效。
@@ -94,7 +94,7 @@ private:
      */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Building|DefenseTower",
         meta = (AllowPrivateAccess = "true"))
-    int32 CachedHeightLevel = 0;
+    int32 CachedHeightLevel = 1;
 
 public:
 

@@ -54,6 +54,12 @@ void ATDHexTile::SetTerrainType(ETDTerrainType NewType)
 
 void ATDHexTile::SetHeightLevel(int32 NewHeight)
 {
+    // 深水地块高度固定为 1，不可修改
+    if (TerrainType == ETDTerrainType::DeepWater)
+    {
+        return;
+    }
+
     const int32 ClampedHeight = FMath::Clamp(NewHeight, MinHeightLevel, MaxHeightLevel);
 
     if (HeightLevel == ClampedHeight)
@@ -131,13 +137,13 @@ float ATDHexTile::GetDefenseBonus() const
         break;
     }
 
-    // 高度加成：高度 2 → +20%，取地形加成和高度加成中的较大值
+    // 高度加成：高度 >= 3 → +20%，高度 == 2 → +10%
     float HeightBonus = 0.0f;
-    if (HeightLevel >= 2)
+    if (HeightLevel >= 3)
     {
         HeightBonus = 0.2f;
     }
-    else if (HeightLevel == 1)
+    else if (HeightLevel == 2)
     {
         HeightBonus = 0.1f;
     }

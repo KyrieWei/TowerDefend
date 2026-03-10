@@ -14,43 +14,28 @@ FTDHexGridSaveData UTDTerrainGenerator::GenerateMap()
 {
     const int32 ActualSeed = ResolveSeed();
     const float SeedOffset = static_cast<float>(ActualSeed);
+    FRandomStream RandStream(ActualSeed);
 
     // 使用 TMap 便于按坐标随机访问（对称化、平滑等需要）
     TMap<FTDHexCoord, FTDHexTileSaveData> TileDataMap;
 
     // ---------------------------------------------------------------
-    // Step 1: Noise 生成高度场和湿度场
+    // Step 1: 距离驱动地形基础层
     // ---------------------------------------------------------------
     TArray<FTDHexCoord> AllCoords;
-    if (bRectangularLayout)
-    {
-        AllCoords = GenerateRectCoords(MapColumns, MapRows);
-        const int32 EstimatedCount = MapColumns * MapRows;
-        TileDataMap.Reserve(EstimatedCount);
-    }
-    else
-    {
-        const FTDHexCoord Origin(0, 0);
-        AllCoords = Origin.GetCoordsInRange(MapRadius);
-        // 预估格子总数: 3*R^2 + 3*R + 1
-        const int32 EstimatedCount = 3 * MapRadius * MapRadius + 3 * MapRadius + 1;
-        TileDataMap.Reserve(EstimatedCount);
-    }
+    FTDHexCoord Center(0, 0);
+    int32 MaxDistance = 1;
+    InitializeCoordinates(AllCoords, Center, MaxDistance);
+    TileDataMap.Reserve(AllCoords.Num());
 
-    for (const FTDHexCoord& Coord : AllCoords)
-    {
-        const float SampleX = static_cast<float>(Coord.Q);
-        const float SampleY = static_cast<float>(Coord.R);
+    // 1a-1b. 距离分层：深海 / 海岸河流 / 中心平原
+    AssignBaseLayerByDistance(AllCoords, Center, MaxDistance, TileDataMap);
 
-        const float HeightNoise = SampleNoise(SampleX, SampleY, HeightNoiseScale, SeedOffset);
-        const float MoistureNoise = SampleNoise(SampleX, SampleY, MoistureNoiseScale, SeedOffset + 1000.0f);
+    // 1c. 散布 Mountain / Hill / Forest
+    ScatterTerrainFeatures(TileDataMap, Center, MaxDistance, RandStream, SeedOffset);
 
-        const int32 Height = MapHeightLevel(HeightNoise);
-        const ETDTerrainType Terrain = DetermineTerrainType(Height, MoistureNoise);
-
-        FTDHexTileSaveData TileData(Coord, Terrain, Height);
-        TileDataMap.Add(Coord, TileData);
-    }
+    // 1d. 放置 Swamp / River 连通集群
+    PlaceWetlandClusters(TileDataMap, Center, MaxDistance, RandStream);
 
     // ---------------------------------------------------------------
     // Step 2: 对称化处理（PVP 公平性）
@@ -134,65 +119,49 @@ float UTDTerrainGenerator::SampleNoise(float X, float Y, float Scale, float Offs
 
 int32 UTDTerrainGenerator::MapHeightLevel(float NoiseValue)
 {
-    // 将 [-1, 1] 映射到 [-2, 3] 的离散等级
-    // 分段阈值设计：偏向中间高度，极端高度较少
-    if (NoiseValue < -0.6f)
+    // 将 [-1, 1] 映射到 [1, 5] 的离散等级
+    // 大部分 Noise 范围映射到基准高度 1
+    if (NoiseValue < 0.3f)
     {
-        return -2;  // 深水
+        return 1;   // 基准高度（大部分地形）
     }
-    if (NoiseValue < -0.3f)
+    if (NoiseValue < 0.5f)
     {
-        return -1;  // 浅水/沼泽
-    }
-    if (NoiseValue < 0.15f)
-    {
-        return 0;   // 平原
-    }
-    if (NoiseValue < 0.4f)
-    {
-        return 1;   // 丘陵
+        return 2;   // 略高
     }
     if (NoiseValue < 0.7f)
     {
-        return 2;   // 高地
+        return 3;   // 丘陵级
+    }
+    if (NoiseValue < 0.85f)
+    {
+        return 4;   // 高地
     }
 
-    return 3;       // 山地
+    return 5;       // 山峰
 }
 
 ETDTerrainType UTDTerrainGenerator::DetermineTerrainType(int32 InHeightLevel, float MoistureValue)
 {
-    // 高度 >= 3 → 山地
-    if (InHeightLevel >= 3)
+    // 高度 >= 5 → 山地
+    if (InHeightLevel >= 5)
     {
         return ETDTerrainType::Mountain;
     }
 
-    // 高度 <= -2 → 深水
-    if (InHeightLevel <= -2)
-    {
-        return ETDTerrainType::DeepWater;
-    }
-
-    // 高度 == -1 → 水域（湿度高则沼泽，否则河流）
-    if (InHeightLevel == -1)
-    {
-        return (MoistureValue > 0.0f) ? ETDTerrainType::Swamp : ETDTerrainType::River;
-    }
-
-    // 高度 == 2 → 丘陵（低湿度）或森林（高湿度）
-    if (InHeightLevel == 2)
+    // 高度 >= 3 → 丘陵或森林（湿度区分）
+    if (InHeightLevel >= 3)
     {
         return (MoistureValue < 0.0f) ? ETDTerrainType::Hill : ETDTerrainType::Forest;
     }
 
-    // 高度 == 1 → 丘陵（低湿度）或森林（高湿度）
-    if (InHeightLevel == 1)
+    // 高度 == 2 → 丘陵或森林
+    if (InHeightLevel == 2)
     {
         return (MoistureValue < 0.2f) ? ETDTerrainType::Hill : ETDTerrainType::Forest;
     }
 
-    // 高度 == 0 → 平原（低湿度）、森林（中湿度）、沼泽（高湿度）
+    // 高度 == 1（基准） → 主要是平原
     if (MoistureValue > 0.5f)
     {
         return ETDTerrainType::Swamp;
@@ -343,7 +312,7 @@ void UTDTerrainGenerator::FlattenAroundBases(
             FTDHexTileSaveData* TileData = TileDataMap.Find(Coord);
             if (TileData)
             {
-                TileData->HeightLevel = 0;
+                TileData->HeightLevel = 1;
                 TileData->TerrainType = ETDTerrainType::Plain;
             }
         }
@@ -363,6 +332,13 @@ void UTDTerrainGenerator::SmoothHeightDifferences(TMap<FTDHexCoord, FTDHexTileSa
         for (auto& Pair : TileDataMap)
         {
             FTDHexTileSaveData& CurrentTile = Pair.Value;
+
+            // 深水地块高度固定，不参与平滑
+            if (CurrentTile.TerrainType == ETDTerrainType::DeepWater)
+            {
+                continue;
+            }
+
             TArray<FTDHexCoord> Neighbors = CurrentTile.Coord.GetAllNeighbors();
 
             for (const FTDHexCoord& NeighborCoord : Neighbors)
@@ -373,25 +349,25 @@ void UTDTerrainGenerator::SmoothHeightDifferences(TMap<FTDHexCoord, FTDHexTileSa
                     continue;
                 }
 
-                const int32 HeightDiff = FMath::Abs(CurrentTile.HeightLevel - NeighborTile->HeightLevel);
+                const int32 HeightDiff = FMath::Abs(
+                    CurrentTile.HeightLevel - NeighborTile->HeightLevel);
 
                 if (HeightDiff > MaxAllowedDiff)
                 {
-                    // 将较高的一方向较低方靠拢
                     if (CurrentTile.HeightLevel > NeighborTile->HeightLevel)
                     {
-                        CurrentTile.HeightLevel = NeighborTile->HeightLevel + MaxAllowedDiff;
+                        CurrentTile.HeightLevel =
+                            NeighborTile->HeightLevel + MaxAllowedDiff;
                     }
                     else
                     {
-                        CurrentTile.HeightLevel = NeighborTile->HeightLevel - MaxAllowedDiff;
+                        CurrentTile.HeightLevel =
+                            NeighborTile->HeightLevel - MaxAllowedDiff;
                     }
 
-                    // 钳制到有效范围
-                    CurrentTile.HeightLevel = FMath::Clamp(CurrentTile.HeightLevel, -2, 3);
-
-                    // 同步地形类型
-                    SyncTerrainTypeWithHeight(CurrentTile);
+                    // 钳制到有效范围 [1, 5]
+                    CurrentTile.HeightLevel = FMath::Clamp(
+                        CurrentTile.HeightLevel, 1, 5);
 
                     bModified = true;
                 }
@@ -407,27 +383,314 @@ void UTDTerrainGenerator::SmoothHeightDifferences(TMap<FTDHexCoord, FTDHexTileSa
 
 void UTDTerrainGenerator::SyncTerrainTypeWithHeight(FTDHexTileSaveData& TileData)
 {
-    // 高度改变后，强制保证地形类型与高度的一致性
-    if (TileData.HeightLevel >= 3
-        && TileData.TerrainType != ETDTerrainType::Mountain)
+    // 深水地块高度强制为 1，不可改变
+    if (TileData.TerrainType == ETDTerrainType::DeepWater)
     {
-        TileData.TerrainType = ETDTerrainType::Mountain;
+        TileData.HeightLevel = 1;
     }
-    else if (TileData.HeightLevel <= -2
-        && TileData.TerrainType != ETDTerrainType::DeepWater)
+}
+
+// ===================================================================
+// 距离驱动地形生成
+// ===================================================================
+
+void UTDTerrainGenerator::InitializeCoordinates(
+    TArray<FTDHexCoord>& OutAllCoords,
+    FTDHexCoord& OutCenter,
+    int32& OutMaxDistance) const
+{
+    if (bRectangularLayout)
     {
-        TileData.TerrainType = ETDTerrainType::DeepWater;
+        OutAllCoords = GenerateRectCoords(MapColumns, MapRows);
+        // 矩形布局的中心：offset 坐标 (Columns/2, Rows/2) 转为 cube
+        const int32 CenterCol = MapColumns / 2;
+        const int32 CenterRow = MapRows / 2;
+        OutCenter = FTDHexCoord(CenterCol, CenterRow - CenterCol / 2);
     }
-    else if (TileData.HeightLevel == -1
-        && TileData.TerrainType != ETDTerrainType::River
-        && TileData.TerrainType != ETDTerrainType::Swamp)
+    else
     {
-        TileData.TerrainType = ETDTerrainType::River;
+        const FTDHexCoord Origin(0, 0);
+        OutAllCoords = Origin.GetCoordsInRange(MapRadius);
+        OutCenter = Origin;
     }
-    else if (TileData.HeightLevel >= 0
-        && (TileData.TerrainType == ETDTerrainType::DeepWater
-            || TileData.TerrainType == ETDTerrainType::River))
+
+    // 计算最大距离（中心到最远格的距离）
+    OutMaxDistance = 1;
+    for (const FTDHexCoord& Coord : OutAllCoords)
     {
-        TileData.TerrainType = ETDTerrainType::Plain;
+        const int32 Dist = Coord.DistanceTo(OutCenter);
+        if (Dist > OutMaxDistance)
+        {
+            OutMaxDistance = Dist;
+        }
     }
+}
+
+float UTDTerrainGenerator::ComputeNormalizedDistance(
+    const FTDHexCoord& Coord,
+    const FTDHexCoord& Center,
+    int32 MaxDistance)
+{
+    if (MaxDistance <= 0)
+    {
+        return 0.0f;
+    }
+
+    const int32 Dist = Coord.DistanceTo(Center);
+    return FMath::Clamp(
+        static_cast<float>(Dist) / static_cast<float>(MaxDistance),
+        0.0f, 1.0f);
+}
+
+void UTDTerrainGenerator::AssignBaseLayerByDistance(
+    const TArray<FTDHexCoord>& AllCoords,
+    const FTDHexCoord& Center,
+    int32 MaxDistance,
+    TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap) const
+{
+    for (const FTDHexCoord& Coord : AllCoords)
+    {
+        const float NormDist = ComputeNormalizedDistance(Coord, Center, MaxDistance);
+
+        // 所有地块默认高度为 1（基准高度）
+        ETDTerrainType Terrain = ETDTerrainType::Plain;
+        constexpr int32 BaseHeight = 1;
+
+        if (NormDist >= EdgeDeepWaterThreshold)
+        {
+            // 边缘深海：高度固定为 1，不可修改
+            Terrain = ETDTerrainType::DeepWater;
+        }
+        else if (NormDist >= CoastalTransitionStart)
+        {
+            // 海岸过渡带 → 河流
+            Terrain = ETDTerrainType::River;
+        }
+
+        TileDataMap.Add(Coord, FTDHexTileSaveData(Coord, Terrain, BaseHeight));
+    }
+}
+
+void UTDTerrainGenerator::ScatterTerrainFeatures(
+    TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+    const FTDHexCoord& Center,
+    int32 MaxDistance,
+    FRandomStream& RandStream,
+    float SeedOffset) const
+{
+    for (auto& Pair : TileDataMap)
+    {
+        FTDHexTileSaveData& TileData = Pair.Value;
+
+        // 仅对内陆平原区域散布地形特征
+        if (TileData.TerrainType != ETDTerrainType::Plain)
+        {
+            continue;
+        }
+
+        // 安全中心区不做散布
+        const float NormDist = ComputeNormalizedDistance(
+            TileData.Coord, Center, MaxDistance);
+        if (NormDist < 0.1f)
+        {
+            continue;
+        }
+
+        // Noise 采样用于空间聚集性
+        const float SampleX = static_cast<float>(TileData.Coord.Q);
+        const float SampleY = static_cast<float>(TileData.Coord.R);
+        const float HeightNoise = SampleNoise(
+            SampleX, SampleY, HeightNoiseScale, SeedOffset);
+        const float MoistureNoise = SampleNoise(
+            SampleX, SampleY, MoistureNoiseScale, SeedOffset + 1000.0f);
+
+        const float Roll = RandStream.FRand();
+
+        // Mountain: 稀少但略微聚集（Noise 门控），高度保持 1
+        if (Roll < MountainSpawnChance && HeightNoise > 0.3f)
+        {
+            TileData.TerrainType = ETDTerrainType::Mountain;
+        }
+        // Hill: 中等概率，高度保持 1
+        else if (Roll < MountainSpawnChance + HillSpawnChance
+            && HeightNoise > 0.0f)
+        {
+            TileData.TerrainType = ETDTerrainType::Hill;
+        }
+        // Forest: 湿润区域偏好，高度保持 1
+        else if (Roll < MountainSpawnChance + HillSpawnChance + ForestSpawnChance
+            && MoistureNoise > -0.2f)
+        {
+            TileData.TerrainType = ETDTerrainType::Forest;
+        }
+    }
+}
+
+void UTDTerrainGenerator::PlaceWetlandClusters(
+    TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+    const FTDHexCoord& Center,
+    int32 MaxDistance,
+    FRandomStream& RandStream) const
+{
+    // 收集内陆平原区的候选种子格
+    TArray<FTDHexCoord> Candidates;
+    for (const auto& Pair : TileDataMap)
+    {
+        if (Pair.Value.TerrainType != ETDTerrainType::Plain)
+        {
+            continue;
+        }
+
+        const float NormDist = ComputeNormalizedDistance(
+            Pair.Key, Center, MaxDistance);
+        if (NormDist >= 0.15f && NormDist < 0.70f)
+        {
+            Candidates.Add(Pair.Key);
+        }
+    }
+
+    // 先放河流集群（约一半），再放沼泽集群（尽量靠近河流）
+    const int32 RiverCount = FMath::Max(WetlandClusterCount / 2, 1);
+    const int32 SwampCount = WetlandClusterCount - RiverCount;
+
+    PlaceTypedClusters(TileDataMap, Candidates,
+        ETDTerrainType::River, RiverCount, RandStream);
+    PlaceTypedClusters(TileDataMap, Candidates,
+        ETDTerrainType::Swamp, SwampCount, RandStream);
+}
+
+TArray<FTDHexCoord> UTDTerrainGenerator::GrowWetlandCluster(
+    const FTDHexCoord& SeedCoord,
+    int32 TargetSize,
+    const TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+    FRandomStream& RandStream)
+{
+    TArray<FTDHexCoord> Cluster;
+    Cluster.Add(SeedCoord);
+
+    for (int32 GrowStep = 1; GrowStep < TargetSize; ++GrowStep)
+    {
+        // 从当前集群最后一个格子向邻居扩展
+        const FTDHexCoord& LastCoord = Cluster.Last();
+        TArray<FTDHexCoord> Neighbors = LastCoord.GetAllNeighbors();
+
+        // 筛选可用邻居：存在于地图中、是平原、且未在集群中
+        TArray<FTDHexCoord> ValidNeighbors;
+        for (const FTDHexCoord& Neighbor : Neighbors)
+        {
+            const FTDHexTileSaveData* NeighborTile = TileDataMap.Find(Neighbor);
+            if (NeighborTile
+                && NeighborTile->TerrainType == ETDTerrainType::Plain
+                && !Cluster.Contains(Neighbor))
+            {
+                ValidNeighbors.Add(Neighbor);
+            }
+        }
+
+        if (ValidNeighbors.Num() == 0)
+        {
+            break;
+        }
+
+        const int32 PickIdx = RandStream.RandRange(0, ValidNeighbors.Num() - 1);
+        Cluster.Add(ValidNeighbors[PickIdx]);
+    }
+
+    return Cluster;
+}
+
+void UTDTerrainGenerator::PlaceTypedClusters(
+    TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+    TArray<FTDHexCoord>& Candidates,
+    ETDTerrainType WetlandType,
+    int32 ClusterCount,
+    FRandomStream& RandStream) const
+{
+    int32 RetryBudget = ClusterCount * 3;
+
+    for (int32 ClusterIdx = 0; ClusterIdx < ClusterCount; ++ClusterIdx)
+    {
+        if (Candidates.Num() == 0 || RetryBudget <= 0)
+        {
+            break;
+        }
+
+        int32 SeedIdx = PickWetlandSeed(
+            Candidates, TileDataMap, WetlandType, RandStream);
+
+        const FTDHexCoord SeedCoord = Candidates[SeedIdx];
+        const FTDHexTileSaveData* SeedTile = TileDataMap.Find(SeedCoord);
+
+        if (!SeedTile || SeedTile->TerrainType != ETDTerrainType::Plain)
+        {
+            Candidates.RemoveAtSwap(SeedIdx);
+            --ClusterIdx;
+            --RetryBudget;
+            continue;
+        }
+
+        const int32 TargetSize = RandStream.RandRange(
+            WetlandClusterMinSize, WetlandClusterMaxSize);
+        TArray<FTDHexCoord> Cluster = GrowWetlandCluster(
+            SeedCoord, TargetSize, TileDataMap, RandStream);
+        ApplyWetlandCluster(Cluster, TileDataMap, WetlandType);
+
+        for (const FTDHexCoord& UsedCoord : Cluster)
+        {
+            Candidates.RemoveSwap(UsedCoord);
+        }
+    }
+}
+
+void UTDTerrainGenerator::ApplyWetlandCluster(
+    const TArray<FTDHexCoord>& ClusterCoords,
+    TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+    ETDTerrainType WetlandType)
+{
+    for (const FTDHexCoord& Coord : ClusterCoords)
+    {
+        FTDHexTileSaveData* TileData = TileDataMap.Find(Coord);
+        if (TileData)
+        {
+            TileData->TerrainType = WetlandType;
+            // 高度保持为 1（基准高度）
+        }
+    }
+}
+
+int32 UTDTerrainGenerator::PickWetlandSeed(
+    const TArray<FTDHexCoord>& Candidates,
+    const TMap<FTDHexCoord, FTDHexTileSaveData>& TileDataMap,
+    ETDTerrainType WetlandType,
+    FRandomStream& RandStream)
+{
+    // 沼泽优先选取邻接河流地块的候选格
+    if (WetlandType == ETDTerrainType::Swamp)
+    {
+        TArray<int32> RiverAdjacentIndices;
+        for (int32 Idx = 0; Idx < Candidates.Num(); ++Idx)
+        {
+            TArray<FTDHexCoord> Neighbors = Candidates[Idx].GetAllNeighbors();
+            for (const FTDHexCoord& Neighbor : Neighbors)
+            {
+                const FTDHexTileSaveData* NeighborTile = TileDataMap.Find(Neighbor);
+                if (NeighborTile
+                    && NeighborTile->TerrainType == ETDTerrainType::River)
+                {
+                    RiverAdjacentIndices.Add(Idx);
+                    break;
+                }
+            }
+        }
+
+        if (RiverAdjacentIndices.Num() > 0)
+        {
+            const int32 PickIdx = RandStream.RandRange(
+                0, RiverAdjacentIndices.Num() - 1);
+            return RiverAdjacentIndices[PickIdx];
+        }
+    }
+
+    // 默认：随机选取
+    return RandStream.RandRange(0, Candidates.Num() - 1);
 }

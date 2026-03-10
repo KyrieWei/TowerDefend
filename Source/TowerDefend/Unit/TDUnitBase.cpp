@@ -233,10 +233,10 @@ float ATDUnitBase::GetHeightAttackBonus(const ATDHexGridManager* Grid) const
 
     int32 MyHeight = CurrentTile->GetHeightLevel();
 
-    // 每高一级 +10% 攻击加成，基于绝对高度
-    if (MyHeight > 0)
+    // 每高于基准高度（1）一级 +10% 攻击加成
+    if (MyHeight > 1)
     {
-        return 1.0f + static_cast<float>(MyHeight) * 0.1f;
+        return 1.0f + static_cast<float>(MyHeight - 1) * 0.1f;
     }
 
     return 1.0f;
@@ -257,11 +257,9 @@ float ATDUnitBase::GetHeightDefenseBonus(const ATDHexGridManager* Grid) const
 
     int32 MyHeight = CurrentTile->GetHeightLevel();
 
-    // 在低地时受到额外伤害：每低一级 +5%
-    if (MyHeight < 0)
-    {
-        return 1.0f + static_cast<float>(FMath::Abs(MyHeight)) * 0.05f;
-    }
+    // 高度等级最低为 1（基准），不存在低地惩罚
+    // 保留接口供未来扩展
+    (void)MyHeight;
 
     return 1.0f;
 }

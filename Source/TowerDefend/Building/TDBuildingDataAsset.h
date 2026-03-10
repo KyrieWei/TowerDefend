@@ -153,13 +153,13 @@ public:
 
     /** 可建造的最低高度等级。 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Building|Placement",
-        meta = (ClampMin = "-2", ClampMax = "3"))
-    int32 MinHeightLevel = -1;
+        meta = (ClampMin = "1", ClampMax = "5"))
+    int32 MinHeightLevel = 1;
 
     /** 可建造的最高高度等级。 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Building|Placement",
-        meta = (ClampMin = "-2", ClampMax = "3"))
-    int32 MaxHeightLevel = 2;
+        meta = (ClampMin = "1", ClampMax = "5"))
+    int32 MaxHeightLevel = 4;
 
     // ---------------------------------------------------------------
     // 视觉资源

@@ -66,10 +66,10 @@ struct FTDHexTileSaveData
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileSaveData")
     ETDTerrainType TerrainType = ETDTerrainType::Plain;
 
-    /** 格子的高度等级，有效范围 [-2, 3]。 */
+    /** 格子的高度等级，有效范围 [1, 5]。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileSaveData",
-        meta = (ClampMin = "-2", ClampMax = "3"))
-    int32 HeightLevel = 0;
+        meta = (ClampMin = "1", ClampMax = "5"))
+    int32 HeightLevel = 1;
 
     /** 所属玩家索引，-1 表示中立。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TileSaveData")

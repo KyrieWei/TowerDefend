@@ -94,7 +94,8 @@ public:
 
     /**
      * 设置高度等级并更新 Mesh 的 Z 轴位置。
-     * 高度会被钳制到 [-2, 3] 范围内。
+     * 高度会被钳制到 [1, 5] 范围内。
+     * 深水（DeepWater）地块高度固定为 1，不可修改。
      *
      * @param NewHeight  新的高度等级。
      */
@@ -155,10 +156,10 @@ public:
     static constexpr float HeightLevelUnitZ = 50.0f;
 
     /** 高度等级最小值。 */
-    static constexpr int32 MinHeightLevel = -2;
+    static constexpr int32 MinHeightLevel = 1;
 
     /** 高度等级最大值。 */
-    static constexpr int32 MaxHeightLevel = 3;
+    static constexpr int32 MaxHeightLevel = 5;
 
 protected:
     // ---------------------------------------------------------------
@@ -173,10 +174,10 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HexTile")
     ETDTerrainType TerrainType = ETDTerrainType::Plain;
 
-    /** 当前高度等级，有效范围 [-2, 3]。 */
+    /** 当前高度等级，有效范围 [1, 5]。 */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HexTile",
-        meta = (ClampMin = "-2", ClampMax = "3"))
-    int32 HeightLevel = 0;
+        meta = (ClampMin = "1", ClampMax = "5"))
+    int32 HeightLevel = 1;
 
     /** 所属玩家索引，-1 表示中立。 */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HexTile")

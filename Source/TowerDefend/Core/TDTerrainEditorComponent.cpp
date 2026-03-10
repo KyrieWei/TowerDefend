@@ -127,6 +127,12 @@ void UTDTerrainEditorComponent::SelectTileUnderCursor()
     {
         ApplyActiveTerrainType();
     }
+
+    // 选中后，如果开启了自动应用高度，则修改地块高度
+    if (bApplyHeightOnClick && bHasSelection)
+    {
+        ApplyActiveHeightLevel();
+    }
 }
 
 void UTDTerrainEditorComponent::SelectTile(const FTDHexCoord& Coord)
@@ -386,6 +392,73 @@ void UTDTerrainEditorComponent::ApplyActiveTerrainType()
 
     // 地形类型变更后重新应用高亮（材质可能被替换）
     ApplySelectionHighlight(Tile, true);
+}
+
+// ===================================================================
+// 当前编辑高度
+// ===================================================================
+
+void UTDTerrainEditorComponent::SetActiveHeightLevel(int32 NewHeight)
+{
+    const int32 ClampedHeight = FMath::Clamp(NewHeight,
+        ATDHexTile::MinHeightLevel, ATDHexTile::MaxHeightLevel);
+
+    if (ActiveHeightLevel == ClampedHeight)
+    {
+        return;
+    }
+
+    const int32 OldHeight = ActiveHeightLevel;
+    ActiveHeightLevel = ClampedHeight;
+    OnActiveHeightLevelChanged.Broadcast(OldHeight, ClampedHeight);
+
+    UE_LOG(LogTDTerrainEditor, Log,
+        TEXT("Active height level set to: %d"), ClampedHeight);
+}
+
+void UTDTerrainEditorComponent::SetApplyHeightOnClick(bool bEnable)
+{
+    bApplyHeightOnClick = bEnable;
+
+    UE_LOG(LogTDTerrainEditor, Log,
+        TEXT("Apply height on click: %s"),
+        bEnable ? TEXT("ON") : TEXT("OFF"));
+}
+
+void UTDTerrainEditorComponent::ApplyActiveHeightLevel()
+{
+    if (!bIsEditMode || !bHasSelection)
+    {
+        return;
+    }
+
+    if (!GridManager)
+    {
+        return;
+    }
+
+    ATDHexTile* Tile = GridManager->GetTileAt(SelectedCoord);
+    if (!Tile)
+    {
+        return;
+    }
+
+    const int32 OldHeight = Tile->GetHeightLevel();
+
+    // 高度相同则跳过
+    if (OldHeight == ActiveHeightLevel)
+    {
+        return;
+    }
+
+    Tile->SetHeightLevel(ActiveHeightLevel);
+
+    const int32 NewHeight = Tile->GetHeightLevel();
+    OnTileHeightChanged.Broadcast(SelectedCoord, OldHeight, NewHeight);
+
+    UE_LOG(LogTDTerrainEditor, Log,
+        TEXT("Applied active height level %d to tile %s (was %d)"),
+        ActiveHeightLevel, *SelectedCoord.ToString(), OldHeight);
 }
 
 // ===================================================================

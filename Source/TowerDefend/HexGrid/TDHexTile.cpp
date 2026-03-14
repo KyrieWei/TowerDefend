@@ -394,15 +394,15 @@ void ATDHexTile::RebuildSideSkirt()
         VertexColors.Add(VColor);
         VertexColors.Add(VColor);
 
-        // 两个三角形（顺时针绕序，法线朝外）
-        // Triangle A: P0, P1, P2
+        // 两个三角形（从外侧看顺时针绕序，法线朝外）
+        // Triangle A: P0, P2, P1
         Triangles.Add(BaseIdx + 0);
+        Triangles.Add(BaseIdx + 2);
         Triangles.Add(BaseIdx + 1);
-        Triangles.Add(BaseIdx + 2);
-        // Triangle B: P0, P2, P3
+        // Triangle B: P0, P3, P2
         Triangles.Add(BaseIdx + 0);
-        Triangles.Add(BaseIdx + 2);
         Triangles.Add(BaseIdx + 3);
+        Triangles.Add(BaseIdx + 2);
 
         VertexCount += 4;
     }

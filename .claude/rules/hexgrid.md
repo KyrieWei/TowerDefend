@@ -100,23 +100,146 @@ PlayerCount = 2          // Player count (affects base distribution)
 | UE SaveGame | Binary (USaveGame subclass) | Runtime fast save/load, local saves |
 | JSON export | `.json` text | Designer editing, map sharing, version control |
 
-### Save Data Structures
+### Save Data Structures (TDHexGridSaveData.h)
 
-- `FTDHexTileSaveData`: Per-tile data (Coord, TerrainType, HeightLevel, bHasBuilding, BuildingID, OwnerPlayerIndex)
-- `FTDHexGridSaveData`: Full map data (MapRadius, Seed, TileDataList, Version)
+**`FTDHexTileSaveData`** — per-tile data:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Coord` | FTDHexCoord | Hex coordinate (Q, R) |
+| `TerrainType` | ETDTerrainType | Terrain type enum |
+| `HeightLevel` | int32 | Height level |
+| `OwnerPlayerIndex` | int32 | Owning player (-1 = neutral) |
+
+**`FTDBuildingSaveData`** — per-building data (Version 2+):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Coord` | FTDHexCoord | Hex coordinate |
+| `BuildingID` | FName | Matches `UTDBuildingDataAsset::BuildingID` for DataAsset lookup |
+| `Level` | int32 | Current level (1-based, ClampMin=1) |
+| `CurrentHealth` | int32 | Current HP (0 = use default max) |
+| `OwnerPlayerIndex` | int32 | Owning player (-1 = neutral) |
+
+**`FTDUnitSaveData`** — per-unit data (Version 2+):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Coord` | FTDHexCoord | Hex coordinate |
+| `UnitID` | FName | Matches `UTDUnitDataAsset::UnitID` for DataAsset lookup |
+| `CurrentHealth` | int32 | Current HP (0 = use default max) |
+| `OwnerPlayerIndex` | int32 | Owning player (-1 = neutral) |
+
+**`FTDHexGridSaveData`** — full map container:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `MapRadius` | int32 | Map radius in tiles |
+| `Seed` | int32 | Random generation seed |
+| `Version` | int32 | Save format version (1 or 2) |
+| `TileDataList` | TArray\<FTDHexTileSaveData\> | All tile data |
+| `BuildingDataList` | TArray\<FTDBuildingSaveData\> | Building data (Version 2+) |
+| `UnitDataList` | TArray\<FTDUnitSaveData\> | Unit data (Version 2+) |
+
+### Save Format Versions
+
+| Version | Content | Notes |
+|---------|---------|-------|
+| 1 | Tiles only | Original format, terrain data only |
+| 2 | Tiles + Buildings + Units | Added BuildingDataList and UnitDataList arrays |
+
+Version 2 is backward compatible — Version 1 JSON files are loaded normally with empty building/unit arrays.
+
+### JSON Format
+
+```json
+{
+  "MapRadius": 15,
+  "Seed": 2016941473,
+  "Version": 2,
+  "Tiles": [
+    { "Q": 0, "R": 0, "TerrainType": "Plain", "HeightLevel": 1, "OwnerPlayerIndex": -1 }
+  ],
+  "Buildings": [
+    { "Q": 3, "R": 0, "BuildingID": "WoodArrowTower", "Level": 1, "CurrentHealth": 0, "OwnerPlayerIndex": 0 }
+  ],
+  "Units": [
+    { "Q": 1, "R": 2, "UnitID": "Swordsman", "CurrentHealth": 0, "OwnerPlayerIndex": 0 }
+  ]
+}
+```
+
+`Buildings` and `Units` arrays are optional — omitted in Version 1 files and parsed with `HasField()` guard for backward compatibility.
+
+### JSON Serialization (TDSaveDataInternal namespace)
+
+| Function | Direction | Description |
+|----------|-----------|-------------|
+| `TileSaveDataToJson` / `JsonToTileSaveData` | ↔ | Per-tile JSON conversion, terrain type as string |
+| `BuildingSaveDataToJson` / `JsonToBuildingSaveData` | ↔ | Per-building JSON conversion, BuildingID as string |
+| `UnitSaveDataToJson` / `JsonToUnitSaveData` | ↔ | Per-unit JSON conversion, UnitID as string |
+| `GridSaveDataToJson` / `JsonToGridSaveData` | ↔ | Full map JSON, conditionally includes Buildings/Units |
+
+### ID-Based Entity Resolution
+
+Buildings and units are serialized by **FName ID**, not by asset path or object reference:
+
+```
+JSON "BuildingID": "WoodArrowTower"
+  → caller provides TArray<UTDBuildingDataAsset*>
+  → ImportBuildingData builds TMap<FName, UTDBuildingDataAsset*> lookup
+  → DataAsset found → DetermineSpawnClass() resolves Blueprint or C++ class
+  → SpawnActor with correct class
+```
+
+This design decouples save data from asset paths. Renaming or moving a Blueprint does not break existing saves as long as the `BuildingID` / `UnitID` remains unchanged.
 
 ### Save Flow
+
 ```
-HexGridManager -> iterate all TDHexTile -> collect Coord/Terrain/Height/Building
-  -> build FTDHexGridSaveData -> serialize to USaveGame or JSON
+Tiles only (Version 1):
+  HexGridManager->ExportSaveData() -> FTDHexGridSaveData
+    -> UTDHexGridSaveGame::ExportToJsonFile()
+    -> UTDMapFileManager::SaveMapToFile()
+
+With entities (Version 2):
+  HexGridManager->ExportSaveData() -> FTDHexGridSaveData (Version=2)
+  BuildingManager->ExportBuildingData() -> BuildingDataList
+  UnitSquad->ExportUnitData() -> UnitDataList
+  -> UTDMapFileManager::SaveMapToFileWithEntities() combines all data
 ```
 
 ### Load Flow
+
 ```
-Read USaveGame or JSON -> deserialize to FTDHexGridSaveData
-  -> clear current grid -> iterate TileDataList creating TDHexTile
-  -> set terrain type, height, buildings -> refresh visuals (mesh height, material)
+Tiles only (Version 1):
+  UTDMapFileManager::LoadMapFromFile()
+    -> UTDHexGridSaveGame::ImportFromJsonFile()
+    -> Grid->ApplySaveData() creates/updates tiles
+
+With entities (Version 2):
+  UTDMapFileManager::LoadMapFromFileWithEntities()
+    -> UTDHexGridSaveGame::ImportFromJsonFile()
+    -> Grid->ApplySaveData() restores terrain
+    -> BuildingManager->ClearAllBuildings()
+    -> BuildingManager->ImportBuildingData(World, Grid, DataList, DataAssets)
+       -> per entry: DataAsset lookup → DetermineSpawnClass → SpawnActor
+       -> InitializeBuilding → iterative Upgrade() → restore health
+       -> type-specific: tower height cache, currency building manager ref
+    -> UnitSquad->ClearAllUnits()
+    -> UnitSquad->ImportUnitData(World, DataList, DataAssets)
+       -> per entry: DataAsset lookup → SpawnActor (UnitActorClass or base)
+       -> InitializeUnit → restore health
 ```
 
+### File Paths
+
+| Path | Method | Description |
+|------|--------|-------------|
+| `Content/SavedMaps/{MapName}.json` | `SaveMapToFile` / `LoadMapFromFile` | Named map saves |
+| `Content/TowerDefend/SerializationMaps/SerializationMaps.json` | `SaveMapToDefaultPath` / `LoadMapFromDefaultPath` | Default serialization path with history rotation |
+| `SerializationMaps_01.json` ~ `_09.json` | `RotateHistoryFiles` | Backup history (max 10 files total) |
+
 ### Auto-Save
+
 Each settlement phase end auto-saves current map state. Supports disconnect reconnection with terrain state recovery. Server saves authoritative data; client saves cache.

@@ -9,8 +9,13 @@
 #include "Core/TDMapFileManager.h"
 #include "HexGrid/TDHexGridManager.h"
 #include "HexGrid/TDHexGridSaveData.h"
+#include "Building/TDBuildingManager.h"
+#include "Building/TDBuildingDataAsset.h"
+#include "Unit/TDUnitSquad.h"
+#include "Unit/TDUnitDataAsset.h"
 
 #include "Engine/World.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -268,13 +273,18 @@ bool UTDBlueprintLibrary::LoadMapFromFile(const UObject* WorldContextObject, con
 		return false;
 	}
 
-	// MapName 为空时从默认序列化路径加载
+	// 确定文件路径
+	FString FilePath;
 	if (MapName.IsEmpty())
 	{
-		return UTDMapFileManager::LoadMapFromDefaultPath(Grid);
+		FilePath = UTDMapFileManager::GetDefaultSerializationFilePath();
+	}
+	else
+	{
+		FilePath = UTDMapFileManager::GetMapFilePath(MapName);
 	}
 
-	return UTDMapFileManager::LoadMapFromFile(Grid, MapName);
+	return LoadMapFromFileWithEntities(WorldContextObject, Grid, FilePath);
 }
 
 TArray<FString> UTDBlueprintLibrary::GetAvailableMapNames()
@@ -320,4 +330,125 @@ void UTDBlueprintLibrary::RegenerateMap(const UObject* WorldContextObject, int32
 	{
 		Grid->GenerateGrid(Radius);
 	}
+}
+
+// ═══════════════════════════════════════════════════════
+//  内部辅助
+// ═══════════════════════════════════════════════════════
+
+TArray<UTDBuildingDataAsset*> UTDBlueprintLibrary::CollectBuildingDataAssets()
+{
+	TArray<UTDBuildingDataAsset*> Result;
+
+	IAssetRegistry& AssetRegistry =
+		FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry")
+		.Get();
+
+	TArray<FAssetData> AssetDataList;
+	AssetRegistry.GetAssetsByClass(
+		UTDBuildingDataAsset::StaticClass()->GetClassPathName(),
+		AssetDataList, true);
+
+	for (const FAssetData& AssetData : AssetDataList)
+	{
+		UTDBuildingDataAsset* Asset =
+			Cast<UTDBuildingDataAsset>(AssetData.GetAsset());
+		if (Asset)
+		{
+			Result.Add(Asset);
+		}
+	}
+
+	return Result;
+}
+
+TArray<UTDUnitDataAsset*> UTDBlueprintLibrary::CollectUnitDataAssets()
+{
+	TArray<UTDUnitDataAsset*> Result;
+
+	IAssetRegistry& AssetRegistry =
+		FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry")
+		.Get();
+
+	TArray<FAssetData> AssetDataList;
+	AssetRegistry.GetAssetsByClass(
+		UTDUnitDataAsset::StaticClass()->GetClassPathName(),
+		AssetDataList, true);
+
+	for (const FAssetData& AssetData : AssetDataList)
+	{
+		UTDUnitDataAsset* Asset =
+			Cast<UTDUnitDataAsset>(AssetData.GetAsset());
+		if (Asset)
+		{
+			Result.Add(Asset);
+		}
+	}
+
+	return Result;
+}
+
+bool UTDBlueprintLibrary::LoadMapFromFileWithEntities(
+	const UObject* WorldContextObject,
+	ATDHexGridManager* Grid,
+	const FString& FilePath)
+{
+	if (!FPaths::FileExists(FilePath))
+	{
+		UE_LOG(LogTemp, Error,
+			TEXT("UTDBlueprintLibrary::LoadMapFromFileWithEntities: "
+				 "File not found: '%s'."), *FilePath);
+		return false;
+	}
+
+	// 解析 JSON
+	UTDHexGridSaveGame* SaveGame = NewObject<UTDHexGridSaveGame>();
+	if (!SaveGame->ImportFromJsonFile(FilePath))
+	{
+		UE_LOG(LogTemp, Error,
+			TEXT("UTDBlueprintLibrary::LoadMapFromFileWithEntities: "
+				 "Failed to parse JSON: '%s'."), *FilePath);
+		return false;
+	}
+
+	// 恢复地形
+	Grid->ApplySaveData(SaveGame->GridData);
+
+	UWorld* World = Grid->GetWorld();
+
+	// 恢复建筑（V2 数据存在时）
+	int32 BuildingCount = 0;
+	if (SaveGame->GridData.BuildingDataList.Num() > 0 && World)
+	{
+		TArray<UTDBuildingDataAsset*> BuildingAssets = CollectBuildingDataAssets();
+
+		UTDBuildingManager* TempBuildingMgr =
+			NewObject<UTDBuildingManager>();
+		TempBuildingMgr->ClearAllBuildings();
+		BuildingCount = TempBuildingMgr->ImportBuildingData(
+			World, Grid,
+			SaveGame->GridData.BuildingDataList,
+			BuildingAssets);
+	}
+
+	// 恢复单位（V2 数据存在时）
+	int32 UnitCount = 0;
+	if (SaveGame->GridData.UnitDataList.Num() > 0 && World)
+	{
+		TArray<UTDUnitDataAsset*> UnitAssets = CollectUnitDataAssets();
+
+		UTDUnitSquad* TempUnitSquad = NewObject<UTDUnitSquad>();
+		TempUnitSquad->ClearAllUnits();
+		UnitCount = TempUnitSquad->ImportUnitData(
+			World,
+			SaveGame->GridData.UnitDataList,
+			UnitAssets);
+	}
+
+	UE_LOG(LogTemp, Log,
+		TEXT("Map loaded: %d tiles, %d buildings, %d units <- %s"),
+		SaveGame->GridData.GetTileCount(),
+		BuildingCount, UnitCount, *FilePath);
+
+	return true;
 }

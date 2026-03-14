@@ -7,6 +7,8 @@
 #include "Core/TDSharedTypes.h"
 #include "TDUnitDataAsset.generated.h"
 
+class ATDUnitBase;
+
 /**
  * ETDUnitType - 军队单位类型。
  *
@@ -116,6 +118,19 @@ public:
     /** 单位使用的静态模型，nullptr 时使用默认占位模型。 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TD|Unit|Visual")
     UStaticMesh* UnitMesh = nullptr;
+
+    // ---------------------------------------------------------------
+    // Actor 类映射
+    // ---------------------------------------------------------------
+
+    /**
+     * 生成单位时使用的 Actor 蓝图类。
+     * 设置后，ImportUnitData 将生成此蓝图 Actor
+     * 而非纯 C++ 基类，从而保留蓝图上配置的默认属性。
+     * 为空时回退到 ATDUnitBase::StaticClass()。
+     */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TD|Unit|Actor")
+    TSubclassOf<ATDUnitBase> UnitActorClass;
 
     // ---------------------------------------------------------------
     // 克制关系

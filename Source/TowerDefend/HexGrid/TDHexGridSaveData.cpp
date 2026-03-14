@@ -18,6 +18,8 @@ void FTDHexGridSaveData::Reset()
     Seed = 0;
     Version = 1;
     TileDataList.Empty();
+    BuildingDataList.Empty();
+    UnitDataList.Empty();
 }
 
 int32 FTDHexGridSaveData::GetTileCount() const
@@ -104,6 +106,90 @@ namespace TDSaveDataInternal
     }
 
     /**
+     * 将单个建筑数据序列化为 JSON 对象。
+     */
+    static TSharedRef<FJsonObject> BuildingSaveDataToJson(const FTDBuildingSaveData& BuildingData)
+    {
+        TSharedRef<FJsonObject> JsonObj = MakeShared<FJsonObject>();
+        JsonObj->SetNumberField(TEXT("Q"), BuildingData.Coord.Q);
+        JsonObj->SetNumberField(TEXT("R"), BuildingData.Coord.R);
+        JsonObj->SetStringField(TEXT("BuildingID"), BuildingData.BuildingID.ToString());
+        JsonObj->SetNumberField(TEXT("Level"), BuildingData.Level);
+        JsonObj->SetNumberField(TEXT("CurrentHealth"), BuildingData.CurrentHealth);
+        JsonObj->SetNumberField(TEXT("OwnerPlayerIndex"), BuildingData.OwnerPlayerIndex);
+        return JsonObj;
+    }
+
+    /**
+     * 从 JSON 对象反序列化单个建筑数据。
+     */
+    static FTDBuildingSaveData JsonToBuildingSaveData(const TSharedPtr<FJsonObject>& JsonObj)
+    {
+        FTDBuildingSaveData BuildingData;
+
+        if (!JsonObj.IsValid())
+        {
+            return BuildingData;
+        }
+
+        const int32 BQ = static_cast<int32>(JsonObj->GetNumberField(TEXT("Q")));
+        const int32 BR = static_cast<int32>(JsonObj->GetNumberField(TEXT("R")));
+        BuildingData.Coord = FTDHexCoord(BQ, BR);
+
+        if (JsonObj->HasField(TEXT("BuildingID")))
+        {
+            BuildingData.BuildingID = FName(*JsonObj->GetStringField(TEXT("BuildingID")));
+        }
+
+        BuildingData.Level = static_cast<int32>(JsonObj->GetNumberField(TEXT("Level")));
+        BuildingData.CurrentHealth = static_cast<int32>(JsonObj->GetNumberField(TEXT("CurrentHealth")));
+        BuildingData.OwnerPlayerIndex = static_cast<int32>(JsonObj->GetNumberField(TEXT("OwnerPlayerIndex")));
+
+        return BuildingData;
+    }
+
+    /**
+     * 将单个单位数据序列化为 JSON 对象。
+     */
+    static TSharedRef<FJsonObject> UnitSaveDataToJson(const FTDUnitSaveData& UnitData)
+    {
+        TSharedRef<FJsonObject> JsonObj = MakeShared<FJsonObject>();
+        JsonObj->SetNumberField(TEXT("Q"), UnitData.Coord.Q);
+        JsonObj->SetNumberField(TEXT("R"), UnitData.Coord.R);
+        JsonObj->SetStringField(TEXT("UnitID"), UnitData.UnitID.ToString());
+        JsonObj->SetNumberField(TEXT("CurrentHealth"), UnitData.CurrentHealth);
+        JsonObj->SetNumberField(TEXT("OwnerPlayerIndex"), UnitData.OwnerPlayerIndex);
+        return JsonObj;
+    }
+
+    /**
+     * 从 JSON 对象反序列化单个单位数据。
+     */
+    static FTDUnitSaveData JsonToUnitSaveData(const TSharedPtr<FJsonObject>& JsonObj)
+    {
+        FTDUnitSaveData UnitData;
+
+        if (!JsonObj.IsValid())
+        {
+            return UnitData;
+        }
+
+        const int32 UQ = static_cast<int32>(JsonObj->GetNumberField(TEXT("Q")));
+        const int32 UR = static_cast<int32>(JsonObj->GetNumberField(TEXT("R")));
+        UnitData.Coord = FTDHexCoord(UQ, UR);
+
+        if (JsonObj->HasField(TEXT("UnitID")))
+        {
+            UnitData.UnitID = FName(*JsonObj->GetStringField(TEXT("UnitID")));
+        }
+
+        UnitData.CurrentHealth = static_cast<int32>(JsonObj->GetNumberField(TEXT("CurrentHealth")));
+        UnitData.OwnerPlayerIndex = static_cast<int32>(JsonObj->GetNumberField(TEXT("OwnerPlayerIndex")));
+
+        return UnitData;
+    }
+
+    /**
      * 将完整地图数据序列化为 JSON 对象。
      */
     static TSharedRef<FJsonObject> GridSaveDataToJson(const FTDHexGridSaveData& GridData)
@@ -113,6 +199,7 @@ namespace TDSaveDataInternal
         RootObj->SetNumberField(TEXT("Seed"), GridData.Seed);
         RootObj->SetNumberField(TEXT("Version"), GridData.Version);
 
+        // 格子数据
         TArray<TSharedPtr<FJsonValue>> TileArray;
         TileArray.Reserve(GridData.TileDataList.Num());
 
@@ -122,6 +209,36 @@ namespace TDSaveDataInternal
         }
 
         RootObj->SetArrayField(TEXT("Tiles"), TileArray);
+
+        // 建筑数据（Version >= 2）
+        if (GridData.BuildingDataList.Num() > 0)
+        {
+            TArray<TSharedPtr<FJsonValue>> BuildingArray;
+            BuildingArray.Reserve(GridData.BuildingDataList.Num());
+
+            for (const FTDBuildingSaveData& BuildingData : GridData.BuildingDataList)
+            {
+                BuildingArray.Add(MakeShared<FJsonValueObject>(
+                    BuildingSaveDataToJson(BuildingData)));
+            }
+
+            RootObj->SetArrayField(TEXT("Buildings"), BuildingArray);
+        }
+
+        // 单位数据（Version >= 2）
+        if (GridData.UnitDataList.Num() > 0)
+        {
+            TArray<TSharedPtr<FJsonValue>> UnitArray;
+            UnitArray.Reserve(GridData.UnitDataList.Num());
+
+            for (const FTDUnitSaveData& UnitData : GridData.UnitDataList)
+            {
+                UnitArray.Add(MakeShared<FJsonValueObject>(
+                    UnitSaveDataToJson(UnitData)));
+            }
+
+            RootObj->SetArrayField(TEXT("Units"), UnitArray);
+        }
 
         return RootObj;
     }
@@ -143,6 +260,7 @@ namespace TDSaveDataInternal
         OutData.Seed = static_cast<int32>(RootObj->GetNumberField(TEXT("Seed")));
         OutData.Version = static_cast<int32>(RootObj->GetNumberField(TEXT("Version")));
 
+        // 格子数据
         if (!RootObj->HasField(TEXT("Tiles")))
         {
             UE_LOG(LogTemp, Error, TEXT("TDSaveData: JSON missing 'Tiles' array."));
@@ -157,6 +275,36 @@ namespace TDSaveDataInternal
         {
             const TSharedPtr<FJsonObject>& TileObj = TileValue->AsObject();
             OutData.TileDataList.Add(JsonToTileSaveData(TileObj));
+        }
+
+        // 建筑数据（向后兼容：Version 1 的 JSON 无此字段）
+        if (RootObj->HasField(TEXT("Buildings")))
+        {
+            const TArray<TSharedPtr<FJsonValue>>& BuildingArray =
+                RootObj->GetArrayField(TEXT("Buildings"));
+
+            OutData.BuildingDataList.Reserve(BuildingArray.Num());
+
+            for (const TSharedPtr<FJsonValue>& BuildingValue : BuildingArray)
+            {
+                const TSharedPtr<FJsonObject>& BuildingObj = BuildingValue->AsObject();
+                OutData.BuildingDataList.Add(JsonToBuildingSaveData(BuildingObj));
+            }
+        }
+
+        // 单位数据（向后兼容：Version 1 的 JSON 无此字段）
+        if (RootObj->HasField(TEXT("Units")))
+        {
+            const TArray<TSharedPtr<FJsonValue>>& UnitArray =
+                RootObj->GetArrayField(TEXT("Units"));
+
+            OutData.UnitDataList.Reserve(UnitArray.Num());
+
+            for (const TSharedPtr<FJsonValue>& UnitValue : UnitArray)
+            {
+                const TSharedPtr<FJsonObject>& UnitObj = UnitValue->AsObject();
+                OutData.UnitDataList.Add(JsonToUnitSaveData(UnitObj));
+            }
         }
 
         return true;

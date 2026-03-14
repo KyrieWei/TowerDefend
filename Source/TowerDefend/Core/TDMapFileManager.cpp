@@ -3,6 +3,8 @@
 #include "Core/TDMapFileManager.h"
 #include "HexGrid/TDHexGridManager.h"
 #include "HexGrid/TDHexGridSaveData.h"
+#include "Building/TDBuildingManager.h"
+#include "Unit/TDUnitSquad.h"
 #include "HAL/PlatformFileManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTDMapFile, Log, All);
@@ -95,6 +97,144 @@ bool UTDMapFileManager::LoadMapFromFile(ATDHexGridManager* Grid, const FString& 
     UE_LOG(LogTDMapFile, Log,
         TEXT("Map loaded: '%s' (%d tiles) <- %s"),
         *MapName, SaveGame->GridData.GetTileCount(), *FilePath);
+    return true;
+}
+
+bool UTDMapFileManager::SaveMapToFileWithEntities(
+    ATDHexGridManager* Grid,
+    const FString& MapName,
+    UTDBuildingManager* BuildingManager,
+    UTDUnitSquad* UnitSquad)
+{
+    if (!Grid)
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::SaveMapToFileWithEntities: Grid is null."));
+        return false;
+    }
+
+    if (MapName.IsEmpty())
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::SaveMapToFileWithEntities: MapName is empty."));
+        return false;
+    }
+
+    const FString Directory = GetSavedMapsDirectory();
+    IFileManager::Get().MakeDirectory(*Directory, true);
+
+    FTDHexGridSaveData SaveData = Grid->ExportSaveData();
+    SaveData.Version = 2;
+
+    // 收集建筑数据
+    if (BuildingManager)
+    {
+        SaveData.BuildingDataList = BuildingManager->ExportBuildingData();
+    }
+
+    // 收集单位数据
+    if (UnitSquad)
+    {
+        SaveData.UnitDataList = UnitSquad->ExportUnitData();
+    }
+
+    UTDHexGridSaveGame* SaveGame = NewObject<UTDHexGridSaveGame>();
+    SaveGame->GridData = SaveData;
+
+    const FString FilePath = GetMapFilePath(MapName);
+    if (!SaveGame->ExportToJsonFile(FilePath))
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::SaveMapToFileWithEntities: "
+                 "Failed to export to '%s'."), *FilePath);
+        return false;
+    }
+
+    UE_LOG(LogTDMapFile, Log,
+        TEXT("Map saved with entities: '%s' (%d tiles, %d buildings, %d units) -> %s"),
+        *MapName,
+        SaveData.GetTileCount(),
+        SaveData.BuildingDataList.Num(),
+        SaveData.UnitDataList.Num(),
+        *FilePath);
+    return true;
+}
+
+bool UTDMapFileManager::LoadMapFromFileWithEntities(
+    ATDHexGridManager* Grid,
+    const FString& MapName,
+    UTDBuildingManager* BuildingManager,
+    UTDUnitSquad* UnitSquad,
+    const TArray<UTDBuildingDataAsset*>& BuildingDataAssets,
+    const TArray<UTDUnitDataAsset*>& UnitDataAssets)
+{
+    if (!Grid)
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::LoadMapFromFileWithEntities: Grid is null."));
+        return false;
+    }
+
+    if (MapName.IsEmpty())
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::LoadMapFromFileWithEntities: MapName is empty."));
+        return false;
+    }
+
+    const FString FilePath = GetMapFilePath(MapName);
+
+    if (!FPaths::FileExists(FilePath))
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::LoadMapFromFileWithEntities: "
+                 "File not found: '%s'."), *FilePath);
+        return false;
+    }
+
+    UTDHexGridSaveGame* SaveGame = NewObject<UTDHexGridSaveGame>();
+    if (!SaveGame->ImportFromJsonFile(FilePath))
+    {
+        UE_LOG(LogTDMapFile, Error,
+            TEXT("UTDMapFileManager::LoadMapFromFileWithEntities: "
+                 "Failed to import from '%s'."), *FilePath);
+        return false;
+    }
+
+    // 先恢复地形
+    Grid->ApplySaveData(SaveGame->GridData);
+
+    UWorld* World = Grid->GetWorld();
+
+    // 恢复建筑
+    int32 BuildingCount = 0;
+    if (BuildingManager && SaveGame->GridData.BuildingDataList.Num() > 0)
+    {
+        BuildingManager->ClearAllBuildings();
+        BuildingCount = BuildingManager->ImportBuildingData(
+            World, Grid,
+            SaveGame->GridData.BuildingDataList,
+            BuildingDataAssets);
+    }
+
+    // 恢复单位
+    int32 UnitCount = 0;
+    if (UnitSquad && SaveGame->GridData.UnitDataList.Num() > 0)
+    {
+        UnitSquad->ClearAllUnits();
+        UnitCount = UnitSquad->ImportUnitData(
+            World,
+            SaveGame->GridData.UnitDataList,
+            UnitDataAssets);
+    }
+
+    UE_LOG(LogTDMapFile, Log,
+        TEXT("Map loaded with entities: '%s' (%d tiles, %d buildings, %d units) <- %s"),
+        *MapName,
+        SaveGame->GridData.GetTileCount(),
+        BuildingCount,
+        UnitCount,
+        *FilePath);
     return true;
 }
 

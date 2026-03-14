@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{7494E984-324C-DF88-7F0C-6D9C75B99CAE}",
+	"EngineAssociation": "{FDC24EC6-4C45-D30B-64B5-61BA35D86599}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -21,6 +21,10 @@
 		{
 			"Name": "AgentIntegrationKit",
 			"Enabled": true
+		},
+		{
+			"Name": "PlatformCrypto",
+			"Enabled": false
 		}
 	]
 }

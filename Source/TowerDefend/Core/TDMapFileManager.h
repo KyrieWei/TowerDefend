@@ -7,6 +7,10 @@
 #include "TDMapFileManager.generated.h"
 
 class ATDHexGridManager;
+class UTDBuildingManager;
+class UTDUnitSquad;
+class UTDBuildingDataAsset;
+class UTDUnitDataAsset;
 
 /**
  * UTDMapFileManager - 地图文件管理器。
@@ -34,6 +38,22 @@ public:
     static bool SaveMapToFile(ATDHexGridManager* Grid, const FString& MapName);
 
     /**
+     * 将网格、建筑和单位数据一并保存为 JSON 文件。
+     * 存档版本号自动设为 2。
+     *
+     * @param Grid              网格管理器。
+     * @param MapName           地图名称（不含扩展名）。
+     * @param BuildingManager   建筑管理器（可选，为空则不保存建筑）。
+     * @param UnitSquad         单位编队管理器（可选，为空则不保存单位）。
+     * @return                  保存是否成功。
+     */
+    static bool SaveMapToFileWithEntities(
+        ATDHexGridManager* Grid,
+        const FString& MapName,
+        UTDBuildingManager* BuildingManager,
+        UTDUnitSquad* UnitSquad);
+
+    /**
      * 从 JSON 文件加载地图数据并应用到网格。
      *
      * @param Grid     网格管理器。
@@ -42,6 +62,26 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "MapFile")
     static bool LoadMapFromFile(ATDHexGridManager* Grid, const FString& MapName);
+
+    /**
+     * 从 JSON 文件加载地图、建筑和单位数据。
+     * 如果文件版本 >= 2 且提供了管理器，自动恢复建筑和单位。
+     *
+     * @param Grid              网格管理器。
+     * @param MapName           地图名称（不含扩展名）。
+     * @param BuildingManager   建筑管理器（可选，为空则跳过建筑恢复）。
+     * @param UnitSquad         单位编队管理器（可选，为空则跳过单位恢复）。
+     * @param BuildingDataAssets 可用的建筑数据资产列表（用于按 ID 查找）。
+     * @param UnitDataAssets    可用的单位数据资产列表（用于按 ID 查找）。
+     * @return                  加载是否成功。
+     */
+    static bool LoadMapFromFileWithEntities(
+        ATDHexGridManager* Grid,
+        const FString& MapName,
+        UTDBuildingManager* BuildingManager,
+        UTDUnitSquad* UnitSquad,
+        const TArray<UTDBuildingDataAsset*>& BuildingDataAssets,
+        const TArray<UTDUnitDataAsset*>& UnitDataAssets);
 
     /**
      * 获取指定地图名称对应的完整文件路径。

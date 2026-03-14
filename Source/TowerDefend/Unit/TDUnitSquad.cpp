@@ -2,6 +2,10 @@
 
 #include "Unit/TDUnitSquad.h"
 #include "Unit/TDUnitBase.h"
+#include "Unit/TDUnitDataAsset.h"
+#include "Engine/World.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogTDUnitSquad, Log, All);
 
 // ===================================================================
 // 添加 / 移除
@@ -217,4 +221,123 @@ void UTDUnitSquad::UpdateUnitPosition(ATDUnitBase* Unit, const FTDHexCoord& OldC
     // 在新坐标上注册
     FTDHexCoord NewCoord = Unit->GetCurrentCoord();
     UnitMap.Add(NewCoord, Unit);
+}
+
+// ===================================================================
+// 存档
+// ===================================================================
+
+TArray<FTDUnitSaveData> UTDUnitSquad::ExportUnitData() const
+{
+    TArray<FTDUnitSaveData> Result;
+    Result.Reserve(UnitMap.Num());
+
+    for (const auto& Pair : UnitMap)
+    {
+        const ATDUnitBase* Unit = Pair.Value;
+        if (!IsValid(Unit))
+        {
+            continue;
+        }
+
+        const UTDUnitDataAsset* Data = Unit->GetUnitData();
+        if (!Data)
+        {
+            continue;
+        }
+
+        FTDUnitSaveData SaveData;
+        SaveData.Coord = Pair.Key;
+        SaveData.UnitID = Data->UnitID;
+        SaveData.CurrentHealth = Unit->GetCurrentHealth();
+        SaveData.OwnerPlayerIndex = Unit->GetOwnerPlayerIndex();
+
+        Result.Add(SaveData);
+    }
+
+    return Result;
+}
+
+int32 UTDUnitSquad::ImportUnitData(
+    UWorld* World,
+    const TArray<FTDUnitSaveData>& InUnitDataList,
+    const TArray<UTDUnitDataAsset*>& InDataAssets)
+{
+    if (!World)
+    {
+        UE_LOG(LogTDUnitSquad, Error,
+            TEXT("ImportUnitData: World is null."));
+        return 0;
+    }
+
+    // 构建 UnitID -> DataAsset 查找表
+    TMap<FName, UTDUnitDataAsset*> DataAssetLookup;
+    for (UTDUnitDataAsset* Asset : InDataAssets)
+    {
+        if (Asset)
+        {
+            DataAssetLookup.Add(Asset->UnitID, Asset);
+        }
+    }
+
+    int32 RestoredCount = 0;
+
+    for (const FTDUnitSaveData& SaveData : InUnitDataList)
+    {
+        UTDUnitDataAsset** FoundAsset = DataAssetLookup.Find(SaveData.UnitID);
+        if (!FoundAsset || !(*FoundAsset))
+        {
+            UE_LOG(LogTDUnitSquad, Warning,
+                TEXT("ImportUnitData: Unknown UnitID '%s', skipping."),
+                *SaveData.UnitID.ToString());
+            continue;
+        }
+
+        // 计算生成位置
+        const FVector SpawnLocation =
+            SaveData.Coord.ToWorldPosition(100.0f) + FVector(0.0f, 0.0f, 25.0f);
+
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride =
+            ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+        // 优先使用 DataAsset 上配置的蓝图类
+        TSubclassOf<ATDUnitBase> SpawnClass = (*FoundAsset)->UnitActorClass
+            ? (*FoundAsset)->UnitActorClass
+            : TSubclassOf<ATDUnitBase>(ATDUnitBase::StaticClass());
+
+        ATDUnitBase* NewUnit = World->SpawnActor<ATDUnitBase>(
+            SpawnClass, SpawnLocation,
+            FRotator::ZeroRotator, SpawnParams);
+
+        if (!NewUnit)
+        {
+            UE_LOG(LogTDUnitSquad, Warning,
+                TEXT("ImportUnitData: Failed to spawn unit '%s' at %s."),
+                *SaveData.UnitID.ToString(),
+                *SaveData.Coord.ToString());
+            continue;
+        }
+
+        // 初始化
+        NewUnit->InitializeUnit(
+            *FoundAsset, SaveData.Coord, SaveData.OwnerPlayerIndex);
+
+        // 恢复生命值
+        if (SaveData.CurrentHealth > 0)
+        {
+            NewUnit->SetCurrentHealth(SaveData.CurrentHealth);
+        }
+
+        // 注册到映射表
+        AddUnit(NewUnit);
+
+        RestoredCount++;
+    }
+
+    UE_LOG(LogTDUnitSquad, Log,
+        TEXT("ImportUnitData: Restored %d/%d units."),
+        RestoredCount, InUnitDataList.Num());
+
+    return RestoredCount;
 }

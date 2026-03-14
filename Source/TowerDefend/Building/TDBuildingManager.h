@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "HexGrid/TDHexCoord.h"
+#include "HexGrid/TDHexGridSaveData.h"
 #include "TDBuildingManager.generated.h"
 
 class ATDBuildingBase;
@@ -11,6 +12,22 @@ class UTDBuildingDataAsset;
 class ATDHexGridManager;
 class ATDHexTile;
 class UTDTechTreeIntegration;
+class ATDPlayerState;
+class ATDCurrencyBuilding;
+
+/** 建筑放置成功时广播。 */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
+    FTDOnBuildingPlaced,
+    ATDBuildingBase*, PlacedBuilding,
+    FTDHexCoord, Coord,
+    int32, OwnerPlayerIndex);
+
+/** 建筑拆除时广播。 */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(
+    FTDOnBuildingDemolished,
+    FTDHexCoord, DemolishedCoord,
+    int32, OwnerPlayerIndex,
+    int32, RefundGold);
 
 /**
  * UTDBuildingManager - 建筑管理器。
@@ -56,13 +73,14 @@ public:
     /**
      * 验证是否可以在指定位置放置建筑。
      *
-     * 验证规则：
+     * 验证规则（7 步）：
      *   1. 参数有效性（非空指针、有效坐标）
      *   2. 目标格子存在
-     *   3. 格子上没有已有建筑
-     *   4. 格子 IsBuildable() == true
+     *   3. 格子上没有已有建筑（一格一建筑）
+     *   4. 格子 IsBuildable() == true（排除山地/深水/沼泽/河流）
      *   5. 格子归属 == 建造者（或格子为中立）
-     *   6. BuildingData->CanBuildOnTerrain() 通过
+     *   6. BuildingData->CanBuildOnTerrain() 通过（ForbiddenTerrains + 高度范围）
+     *   7. TechIntegration->IsBuildingUnlockedForPlayer() 通过（可选，未注入时跳过）
      *
      * @param InBuildingData      建筑数据资产。
      * @param Grid                六边形网格管理器。
@@ -86,6 +104,47 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "Building|Manager")
     bool RemoveBuilding(const FTDHexCoord& InCoord);
+
+    /**
+     * 拆除指定坐标上的建筑并返还部分金币。
+     * 验证建筑存在且属于指定玩家后执行拆除。
+     * 退款金额 = 建造费用 * RefundPercent / 100。
+     *
+     * @param InCoord             目标坐标。
+     * @param InPlayer            执行拆除的玩家状态（用于验证归属和退款）。
+     * @param RefundPercent       退款比例（0-100，默认 50%）。
+     * @return                    是否成功拆除。
+     */
+    UFUNCTION(BlueprintCallable, Category = "Building|Manager")
+    bool DemolishBuilding(
+        const FTDHexCoord& InCoord,
+        ATDPlayerState* InPlayer,
+        int32 RefundPercent = 50);
+
+    /**
+     * 升级指定坐标上的建筑，同时扣除玩家金币。
+     * 验证建筑可升级且玩家金币充足后执行。
+     *
+     * @param InCoord   目标坐标。
+     * @param InPlayer  执行升级的玩家状态。
+     * @return          是否成功升级。
+     */
+    UFUNCTION(BlueprintCallable, Category = "Building|Manager")
+    bool UpgradeBuilding(
+        const FTDHexCoord& InCoord,
+        ATDPlayerState* InPlayer);
+
+    // ---------------------------------------------------------------
+    // 事件委托
+    // ---------------------------------------------------------------
+
+    /** 建筑放置成功时广播。 */
+    UPROPERTY(BlueprintAssignable, Category = "Building|Manager|Events")
+    FTDOnBuildingPlaced OnBuildingPlaced;
+
+    /** 建筑拆除时广播。 */
+    UPROPERTY(BlueprintAssignable, Category = "Building|Manager|Events")
+    FTDOnBuildingDemolished OnBuildingDemolished;
 
     // ---------------------------------------------------------------
     // 查询
@@ -159,6 +218,37 @@ public:
     void ClearAllBuildings();
 
     // ---------------------------------------------------------------
+    // 存档接口
+    // ---------------------------------------------------------------
+
+    /**
+     * 导出所有建筑的保存数据。
+     * 遍历 BuildingMap，将每个有效建筑转换为 FTDBuildingSaveData。
+     *
+     * @return  建筑保存数据数组。
+     */
+    UFUNCTION(BlueprintPure, Category = "Building|Save")
+    TArray<FTDBuildingSaveData> ExportBuildingData() const;
+
+    /**
+     * 从保存数据恢复所有建筑。
+     * 根据 BuildingID 查找对应的 DataAsset，在指定坐标生成建筑。
+     * 需要先清空现有建筑（调用方负责）。
+     *
+     * @param World              世界上下文。
+     * @param Grid               六边形网格管理器。
+     * @param InBuildingDataList 建筑保存数据数组。
+     * @param InDataAssets       可用的建筑数据资产列表（用于按 ID 查找）。
+     * @return                   成功恢复的建筑数量。
+     */
+    UFUNCTION(BlueprintCallable, Category = "Building|Save")
+    int32 ImportBuildingData(
+        UWorld* World,
+        ATDHexGridManager* Grid,
+        const TArray<FTDBuildingSaveData>& InBuildingDataList,
+        const TArray<UTDBuildingDataAsset*>& InDataAssets);
+
+    // ---------------------------------------------------------------
     // 科技树集成
     // ---------------------------------------------------------------
 
@@ -177,8 +267,9 @@ private:
 
     /**
      * 根据建筑数据资产的类型决定实际生成的 Actor 子类。
-     * ArrowTower/CannonTower -> ATDDefenseTower
+     * ArrowTower/CannonTower/MageTower -> ATDDefenseTower
      * Wall -> ATDWall
+     * ResourceBuilding -> ATDCurrencyBuilding
      * 其他 -> ATDBuildingBase
      */
     TSubclassOf<ATDBuildingBase> DetermineSpawnClass(

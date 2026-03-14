@@ -7,6 +7,8 @@
 #include "HexGrid/TDHexGridSaveData.h"
 #include "TDBuildingDataAsset.generated.h"
 
+class ATDBuildingBase;
+
 // ===================================================================
 // ETDBuildingType - 建筑类型枚举
 // ===================================================================
@@ -41,6 +43,9 @@ enum class ETDBuildingType : uint8
 
     /** 陷阱 — 一次性或持续性地面效果。 */
     Trap            UMETA(DisplayName = "Trap"),
+
+    /** 法师塔 — 自动攻击范围内敌军，魔法伤害。 */
+    MageTower       UMETA(DisplayName = "MageTower"),
 };
 
 // ===================================================================
@@ -168,6 +173,19 @@ public:
     /** 建筑静态模型。 */
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Building|Visual")
     TObjectPtr<UStaticMesh> BuildingMesh;
+
+    // ---------------------------------------------------------------
+    // Actor 类映射
+    // ---------------------------------------------------------------
+
+    /**
+     * 生成建筑时使用的 Actor 蓝图类。
+     * 设置后，PlaceBuilding / ImportBuildingData 将生成此蓝图 Actor
+     * 而非纯 C++ 基类，从而保留蓝图上配置的默认属性（如 LevelDataArray）。
+     * 为空时回退到 DetermineSpawnClass 的类型推断逻辑。
+     */
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Building|Actor")
+    TSubclassOf<ATDBuildingBase> BuildingActorClass;
 
     // ---------------------------------------------------------------
     // 查询接口

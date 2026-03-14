@@ -98,6 +98,14 @@ public:
     UFUNCTION(BlueprintPure, Category = "TD|Unit")
     bool IsDead() const { return CurrentHealth <= 0; }
 
+    /**
+     * 直接设置当前血量（存档恢复用）。
+     * 不触发伤害/死亡事件。
+     *
+     * @param NewHealth  新的血量值。
+     */
+    void SetCurrentHealth(int32 NewHealth) { CurrentHealth = NewHealth; }
+
     // ---------------------------------------------------------------
     // 移动
     // ---------------------------------------------------------------

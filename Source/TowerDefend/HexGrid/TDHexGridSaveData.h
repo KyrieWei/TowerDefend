@@ -88,13 +88,106 @@ struct FTDHexTileSaveData
 };
 
 // ===================================================================
+// FTDBuildingSaveData - 单个建筑的序列化数据
+// ===================================================================
+
+/**
+ * 单个建筑的保存数据。
+ * 纯数据结构体，使用 FName 标识建筑类型（对应 UTDBuildingDataAsset::BuildingID）。
+ * 不包含运行时引用，用于地图序列化 / 反序列化。
+ */
+USTRUCT(BlueprintType)
+struct FTDBuildingSaveData
+{
+    GENERATED_BODY()
+
+    /** 建筑所在格子的六边形坐标。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuildingSaveData")
+    FTDHexCoord Coord;
+
+    /** 建筑数据资产 ID（对应 UTDBuildingDataAsset::BuildingID）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuildingSaveData")
+    FName BuildingID;
+
+    /** 建筑当前等级（1-based）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuildingSaveData",
+        meta = (ClampMin = "1"))
+    int32 Level = 1;
+
+    /** 建筑当前生命值。0 表示使用默认最大值。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuildingSaveData")
+    int32 CurrentHealth = 0;
+
+    /** 所属玩家索引，-1 表示中立。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BuildingSaveData")
+    int32 OwnerPlayerIndex = -1;
+
+    FTDBuildingSaveData() = default;
+
+    FTDBuildingSaveData(const FTDHexCoord& InCoord, FName InBuildingID,
+        int32 InLevel, int32 InHealth, int32 InOwner = -1)
+        : Coord(InCoord)
+        , BuildingID(InBuildingID)
+        , Level(InLevel)
+        , CurrentHealth(InHealth)
+        , OwnerPlayerIndex(InOwner)
+    {
+    }
+};
+
+// ===================================================================
+// FTDUnitSaveData - 单个军队单位的序列化数据
+// ===================================================================
+
+/**
+ * 单个军队单位的保存数据。
+ * 纯数据结构体，使用 FName 标识单位类型（对应 UTDUnitDataAsset::UnitID）。
+ * 不包含运行时引用，用于地图序列化 / 反序列化。
+ */
+USTRUCT(BlueprintType)
+struct FTDUnitSaveData
+{
+    GENERATED_BODY()
+
+    /** 单位所在格子的六边形坐标。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UnitSaveData")
+    FTDHexCoord Coord;
+
+    /** 单位数据资产 ID（对应 UTDUnitDataAsset::UnitID）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UnitSaveData")
+    FName UnitID;
+
+    /** 单位当前生命值。0 表示使用默认最大值。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UnitSaveData")
+    int32 CurrentHealth = 0;
+
+    /** 所属玩家索引，-1 表示中立。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UnitSaveData")
+    int32 OwnerPlayerIndex = -1;
+
+    FTDUnitSaveData() = default;
+
+    FTDUnitSaveData(const FTDHexCoord& InCoord, FName InUnitID,
+        int32 InHealth, int32 InOwner = -1)
+        : Coord(InCoord)
+        , UnitID(InUnitID)
+        , CurrentHealth(InHealth)
+        , OwnerPlayerIndex(InOwner)
+    {
+    }
+};
+
+// ===================================================================
 // FTDHexGridSaveData - 完整地图的序列化数据
 // ===================================================================
 
 /**
  * 完整六边形网格地图的保存数据。
- * 包含地图元信息和所有格子数据，可序列化为 USaveGame 或 JSON。
+ * 包含地图元信息、所有格子数据、建筑和单位数据，可序列化为 USaveGame 或 JSON。
  * 用作地形生成器的输出格式和存档的核心数据载体。
+ *
+ * Version 1: 仅地形数据。
+ * Version 2: 增加建筑和单位数据。
  */
 USTRUCT(BlueprintType)
 struct FTDHexGridSaveData
@@ -124,6 +217,14 @@ struct FTDHexGridSaveData
     /** 所有格子的保存数据列表。 */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
     TArray<FTDHexTileSaveData> TileDataList;
+
+    /** 所有建筑的保存数据列表（Version >= 2）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
+    TArray<FTDBuildingSaveData> BuildingDataList;
+
+    /** 所有军队单位的保存数据列表（Version >= 2）。 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GridSaveData")
+    TArray<FTDUnitSaveData> UnitDataList;
 
     /** 清空所有数据并重置为默认值。 */
     void Reset();

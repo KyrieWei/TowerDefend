@@ -13,6 +13,10 @@ class ATDGameMode;
 class ATDPlayerState;
 class ATDPlayerController;
 class ATDHexGridManager;
+class UTDBuildingManager;
+class UTDBuildingDataAsset;
+class UTDUnitDataAsset;
+class UTDUnitSquad;
 
 /**
  * TD 蓝图工具库
@@ -208,6 +212,9 @@ public:
 	 * 当 MapName 非空时，从 Content/SavedMaps/{MapName}.json 加载。
 	 * 当 MapName 为空时，从默认路径 Content/TowerDefend/SerializationMaps/SerializationMaps.json 加载。
 	 *
+	 * 如果 JSON 为 Version 2 格式，自动恢复建筑和单位数据。
+	 * 建筑/单位的 DataAsset 通过扫描 Content/TowerDefend/DataAssets/ 目录自动收集。
+	 *
 	 * @param WorldContextObject  世界上下文。
 	 * @param MapName             地图文件名（不含扩展名），为空则使用默认路径。
 	 * @return                    是否加载成功。
@@ -251,4 +258,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TD|Map",
 		meta = (WorldContext = "WorldContextObject"))
 	static void RegenerateMap(const UObject* WorldContextObject, int32 Radius = 0);
+
+private:
+	/** 扫描指定目录下的所有 DataAsset 并收集为数组。 */
+	static TArray<UTDBuildingDataAsset*> CollectBuildingDataAssets();
+
+	/** 扫描指定目录下的所有 UnitDataAsset 并收集为数组。 */
+	static TArray<UTDUnitDataAsset*> CollectUnitDataAssets();
+
+	/**
+	 * 加载 JSON 并恢复地形 + 实体（建筑/单位）。
+	 * 统一的 V2 加载实现，供 LoadMapFromFile 调用。
+	 */
+	static bool LoadMapFromFileWithEntities(
+		const UObject* WorldContextObject,
+		ATDHexGridManager* Grid,
+		const FString& FilePath);
 };

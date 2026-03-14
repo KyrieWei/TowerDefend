@@ -1,7 +1,7 @@
 {
 	"MapRadius": 15,
 	"Seed": 2016941473,
-	"Version": 1,
+	"Version": 2,
 	"Tiles": [
 		{
 			"Q": 0,
@@ -2802,6 +2802,32 @@
 			"TerrainType": "DeepWater",
 			"HeightLevel": 1,
 			"OwnerPlayerIndex": -1
+		}
+	],
+	"Buildings": [
+		{
+			"Q": 3,
+			"R": 0,
+			"BuildingID": "WoodArrowTower",
+			"Level": 1,
+			"CurrentHealth": 0,
+			"OwnerPlayerIndex": 0
+		},
+		{
+			"Q": 5,
+			"R": 0,
+			"BuildingID": "MageTower",
+			"Level": 1,
+			"CurrentHealth": 0,
+			"OwnerPlayerIndex": 0
+		},
+		{
+			"Q": 5,
+			"R": -1,
+			"BuildingID": "CurrencyLine",
+			"Level": 2,
+			"CurrentHealth": 0,
+			"OwnerPlayerIndex": 0
 		}
 	]
 }

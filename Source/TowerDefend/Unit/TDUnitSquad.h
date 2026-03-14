@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "HexGrid/TDHexCoord.h"
+#include "HexGrid/TDHexGridSaveData.h"
 #include "TDUnitSquad.generated.h"
 
 class ATDUnitBase;
+class UTDUnitDataAsset;
 
 /**
  * UTDUnitSquad - 编队管理器。
@@ -143,6 +145,34 @@ public:
      */
     UFUNCTION(BlueprintCallable, Category = "TD|Unit|Squad")
     void UpdateUnitPosition(ATDUnitBase* Unit, const FTDHexCoord& OldCoord);
+
+    // ---------------------------------------------------------------
+    // 存档接口
+    // ---------------------------------------------------------------
+
+    /**
+     * 导出所有单位的保存数据。
+     * 遍历 UnitMap，将每个有效单位转换为 FTDUnitSaveData。
+     *
+     * @return  单位保存数据数组。
+     */
+    UFUNCTION(BlueprintPure, Category = "TD|Unit|Save")
+    TArray<FTDUnitSaveData> ExportUnitData() const;
+
+    /**
+     * 从保存数据恢复所有单位。
+     * 根据 UnitID 查找对应的 DataAsset，在指定坐标生成单位并注册。
+     *
+     * @param World            世界上下文。
+     * @param InUnitDataList   单位保存数据数组。
+     * @param InDataAssets     可用的单位数据资产列表（用于按 ID 查找）。
+     * @return                 成功恢复的单位数量。
+     */
+    UFUNCTION(BlueprintCallable, Category = "TD|Unit|Save")
+    int32 ImportUnitData(
+        UWorld* World,
+        const TArray<FTDUnitSaveData>& InUnitDataList,
+        const TArray<UTDUnitDataAsset*>& InDataAssets);
 
 private:
     /** 坐标到单位的映射，支持 O(1) 坐标查询。 */

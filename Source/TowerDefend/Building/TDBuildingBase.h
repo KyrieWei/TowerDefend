@@ -107,11 +107,12 @@ public:
     /**
      * 执行升级。等级 +1。
      * 调用方负责事先检查 CanUpgrade() 并扣费。
+     * 子类可覆盖以实现升级时的额外逻辑（如切换模型、调整属性）。
      *
      * @return  升级是否成功。
      */
     UFUNCTION(BlueprintCallable, Category = "Building|Upgrade")
-    bool Upgrade();
+    virtual bool Upgrade();
 
     // ---------------------------------------------------------------
     // 受伤与销毁
@@ -132,6 +133,14 @@ public:
     /** 将血量恢复到最大值。 */
     UFUNCTION(BlueprintCallable, Category = "Building|Combat")
     void RepairToFull();
+
+    /**
+     * 直接设置当前血量（存档恢复用）。
+     * 不触发伤害/销毁事件。
+     *
+     * @param NewHealth  新的血量值。
+     */
+    void SetCurrentHealth(int32 NewHealth) { CurrentHealth = NewHealth; }
 
     // ---------------------------------------------------------------
     // 攻击（虚函数，子类可覆盖）
@@ -157,13 +166,13 @@ public:
     // 经济
     // ---------------------------------------------------------------
 
-    /** 每回合金币产出。 */
+    /** 每回合金币产出。子类可覆盖以实现等级缩放。 */
     UFUNCTION(BlueprintPure, Category = "Building|Economy")
-    int32 GetGoldPerRound() const;
+    virtual int32 GetGoldPerRound() const;
 
-    /** 每回合科研点产出。 */
+    /** 每回合科研点产出。子类可覆盖以实现等级缩放。 */
     UFUNCTION(BlueprintPure, Category = "Building|Economy")
-    int32 GetResearchPerRound() const;
+    virtual int32 GetResearchPerRound() const;
 
     // ---------------------------------------------------------------
     // 事件委托
